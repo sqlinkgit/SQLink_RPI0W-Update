@@ -57,7 +57,7 @@
     }
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
-    // --- 4. PARSOWANIE CONFIGU (Poprawione mapowanie dla przełączników) ---
+    // --- 4. PARSOWANIE CONFIGU SVXLINK ---
     function parse_svx_conf($file) {
         $ini = []; $curr = "GLOBAL"; if (!file_exists($file)) return [];
         foreach (file($file) as $line) {
@@ -71,17 +71,11 @@
 
     $vals = [
         'Callsign'      => $ref['CALLSIGN'] ?? $simp['CALLSIGN'] ?? 'N0CALL',
-        'Password'      => $ref['AUTH_KEY'] ?? '',
-        'Host'          => $ref['HOSTS'] ?? '',
-        'Port'          => $ref['HOST_PORT'] ?? '',
-        'DefaultTG'     => $ref['DEFAULT_TG'] ?? '0',
-        'MonitorTGs'    => $ref['MONITOR_TGS'] ?? '',
-        'TgTimeout'     => $ref['TG_SELECT_TIMEOUT'] ?? '60',
-        'TmpTimeout'    => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600',
-        'Beep3Tone'     => $ref['TGSTBEEP_ENABLE'] ?? '0',      // Poprawione mapowanie
-        'AnnounceTG'    => $ref['TGREANON_ENABLE'] ?? '0',     // Poprawione mapowanie
-        'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0',       // Poprawione mapowanie
-        'RogerBeep'     => $simp['RGR_SOUND_ALWAYS'] ?? '0',   // Roger Beep z SimplexLogic
+        'Password'      => $ref['AUTH_KEY'] ?? '', 'Host' => $ref['HOSTS'] ?? '', 'Port' => $ref['HOST_PORT'] ?? '',
+        'DefaultTG'     => $ref['DEFAULT_TG'] ?? '0', 'MonitorTGs' => $ref['MONITOR_TGS'] ?? '',
+        'TgTimeout'     => $ref['TG_SELECT_TIMEOUT'] ?? '60', 'TmpTimeout' => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600',
+        'Beep3Tone'     => $ref['TGSTBEEP_ENABLE'] ?? '0', 'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0',
+        'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0', 'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
         'Modules'       => $simp['MODULES'] ?? 'Help,Parrot,EchoLink'
     ];
     $vals_el = [
@@ -106,13 +100,29 @@
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
         echo "<div class='alert alert-warning' style='text-align:left;'><strong>Wynik Aktualizacji:</strong><br><pre style='font-size:10px;'>$out</pre></div><meta http-equiv='refresh' content='5'>";
     }
-    if (isset($_POST['auto_proxy'])) { $out = shell_exec("sudo /usr/local/bin/proxy_hunter.py 2>&1"); echo "<div class='alert alert-warning'><strong>♻️ Auto-Proxy:</strong><br><small>$out</small></div><meta http-equiv='refresh' content='3'>"; }
 
-    // --- 6. WIFI (RPi Zero W) ---
+    // --- 6. WIFI (RPi Zero W Fix) ---
+    if (isset($_POST['wifi_scan'])) {
+        $scan = shell_exec('sudo /sbin/iwlist wlan0 scan | grep ESSID');
+        preg_match_all('/ESSID:"([^"]+)"/', $scan, $m);
+        if (!empty($m[1])) {
+            foreach(array_unique($m[1]) as $s) { $wifi_scan_results[] = ['ssid'=>$s, 'signal'=>'?']; }
+        }
+    }
+    if (isset($_POST['wifi_connect'])) {
+        $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']);
+        shell_exec("sudo /usr/local/bin/add_wifi.sh $ssid $pass");
+        echo "<div class='alert alert-success'>Próba połączenia z $ssid...</div>";
+    }
+    if (isset($_POST['wifi_delete'])) {
+        $ssid = escapeshellarg($_POST['ssid']);
+        shell_exec("sudo /usr/local/bin/del_wifi.sh $ssid");
+        echo "<div class='alert alert-warning'>Usunięto sieć: ".htmlspecialchars($_POST['ssid'])."</div><meta http-equiv='refresh' content='2'>";
+    }
+
     $saved_wifi_list = [];
     $conf = @file_get_contents('/etc/wpa_supplicant/wpa_supplicant.conf');
     if ($conf) { preg_match_all('/ssid="([^"]+)"/', $conf, $matches); if (!empty($matches[1])) $saved_wifi_list = array_unique($matches[1]); }
-    if (isset($_POST['wifi_connect'])) { $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']); shell_exec("sudo /usr/local/bin/add_wifi.sh $ssid $pass"); }
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -135,10 +145,10 @@
 
     <div class="telemetry-row">
         <div class="t-box"><div class="t-label">CPU Temp</div><div class="t-val" id="t-temp">...</div><div class="progress-bg"><div class="progress-fill" id="t-temp-bar" style="width: 0%;"></div></div></div>
-        <div class="t-box"><div class="t-label">RAM Used</div><div class="t-val" id=\"t-ram\">...</div><div class="progress-bg"><div class="progress-fill" id="t-ram-bar" style="width: 0%;"></div></div></div>
-        <div class="t-box"><div class="t-label">Disk Used</div><div class="t-val" id=\"t-disk\">...</div><div class="progress-bg"><div class="progress-fill" id="t-disk-bar" style="width: 0%;"></div></div></div>
-        <div class="t-box"><div class="t-label">Network</div><div class="t-val" id=\"t-net-type\">...</div><div style="font-size:9px; color:#aaa;" id="t-ip">...</div></div>
-        <div class="t-box"><div class="t-label">Hardware</div><div class="t-val" id=\"t-hw\" style="font-size:10px; margin-top:5px;">...</div></div>
+        <div class="t-box"><div class="t-label">RAM Used</div><div class="t-val" id="t-ram">...</div><div class="progress-bg"><div class="progress-fill" id="t-ram-bar" style="width: 0%;"></div></div></div>
+        <div class="t-box"><div class="t-label">Disk Used</div><div class="t-val" id="t-disk">...</div><div class="progress-bg"><div class="progress-fill" id="t-disk-bar" style="width: 0%;"></div></div></div>
+        <div class="t-box"><div class="t-label">Network</div><div class="t-val" id="t-net-type">...</div><div style="font-size:9px; color:#aaa;" id="t-ip">...</div></div>
+        <div class="t-box"><div class="t-label">Hardware</div><div class="t-val" id="t-hw" style="font-size:10px; margin-top:5px;">...</div></div>
     </div>
 
     <div class="tabs">
@@ -165,11 +175,7 @@
     <div id="Help" class="tab-content"><?php include 'help.php'; ?></div>
     <div id="Logs" class="tab-content"><div id="log-content" class="log-box">...</div></div>
 </div>
-<div class="main-footer">
-    SvxLink v1.9.99.36@master Copyright (C) 2003-2025 Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>
-    <span class="callsign-blue">SQLink System</span> • <span style="color: #ffffff;">SierraEcho & Team Edition</span><br>
-    Website design by <span class="callsign-blue">SQ7UTP</span>
-</div>
+<div class="main-footer">SvxLink v1.9.99.36@master Copyright (C) 2003-2025 Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>Design by <span class="callsign-blue">SQ7UTP</span></div>
 <script>const GLOBAL_CALLSIGN = "<?php echo $vals['Callsign']; ?>";</script>
 <script src="script.js?v=<?php echo time(); ?>"></script>
 </body>
