@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ustawienia
+# Ustawienia pod nowe repozytorium RPi Zero W
 GIT_URL="https://github.com/SQLinkgit/SQLink_RPI0W-Update.git"
 GIT_DIR="/root/SQLink_RPI0W-Update"
 WWW_DIR="/var/www/html"
@@ -10,6 +10,7 @@ date
 
 sleep 10
 
+# 1. Sprawdź czy folder repozytorium istnieje (jak nie, to pobierz)
 if [ ! -d "$GIT_DIR" ]; then
     echo "⚠️ Folder repozytorium RPi nie istnieje. Pobieram go od nowa..."
     cd /root
@@ -20,12 +21,14 @@ if [ ! -d "$GIT_DIR" ]; then
     fi
 fi
 
+# 2. Pobierz zmiany z GitHub (Force Pull)
 echo "Pobieram najnowszą wersję z GitHub (SQLink_RPI0W-Update)..."
 cd $GIT_DIR
 git reset --hard
 git pull origin main
 
 # 3. SAMO-AKTUALIZACJA SKRYPTU
+# Jeśli w repozytorium jest nowsza wersja tego skryptu, nadpisz lokalny w /usr/local/bin
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
     echo "Znaleziono nową wersję skryptu aktualizacji. Instaluję..."
     sudo cp "$GIT_DIR/update_dashboard.sh" /usr/local/bin/
