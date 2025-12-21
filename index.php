@@ -32,7 +32,7 @@
         } else { echo "ERROR"; } exit;
     }
 
-    // --- AUDIO (RPi Simple Mixer) ---
+    // --- 3. AUDIO (RPi Simple Mixer) ---
     $CARD_ID = 0;
     $MIXER_IDS = ['Mic_Cap_Sw' => 7, 'Mic_Cap_Vol' => 8, 'Auto_Gain_Ctrl' => 9, 'Spk_Play_Sw' => 5, 'Spk_Play_Vol' => 6];
     $audio = []; $audio_msg = '';
@@ -57,7 +57,7 @@
     }
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
-    // --- PARSOWANIE CONFIGU (Poprawione Mapowanie) ---
+    // --- 4. PARSOWANIE CONFIGU (RPi Fix) ---
     function parse_svx_conf($file) {
         $ini = []; $curr = "GLOBAL"; if (!file_exists($file)) return [];
         foreach (file($file) as $line) {
@@ -71,39 +71,46 @@
 
     $vals = [
         'Callsign' => $ref['CALLSIGN'] ?? $simp['CALLSIGN'] ?? 'N0CALL',
-        'Host' => $ref['HOSTS'] ?? '',
-        'Port' => $ref['HOST_PORT'] ?? '',
-        'Password' => $ref['AUTH_KEY'] ?? '',
-        'DefaultTG' => $ref['DEFAULT_TG'] ?? '0',
-        'MonitorTGs' => $ref['MONITOR_TGS'] ?? '',
-        'TgTimeout' => $ref['TG_SELECT_TIMEOUT'] ?? '60',
-        'TmpTimeout' => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600',
-        'Beep3Tone' => $ref['TGSTBEEP_ENABLE'] ?? '0',
-        'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0',
-        'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0',
-        'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
+        'Password' => $ref['AUTH_KEY'] ?? '', 'Host' => $ref['HOSTS'] ?? '', 'Port' => $ref['HOST_PORT'] ?? '',
+        'DefaultTG' => $ref['DEFAULT_TG'] ?? '0', 'MonitorTGs' => $ref['MONITOR_TGS'] ?? '',
+        'TgTimeout' => $ref['TG_SELECT_TIMEOUT'] ?? '60', 'TmpTimeout' => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600',
+        'Beep3Tone' => $ref['TGSTBEEP_ENABLE'] ?? '0', 'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0',
+        'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0', 'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
         'Modules' => $simp['MODULES'] ?? 'Help,Parrot,EchoLink'
     ];
     $vals_el = [
         'Callsign' => $el['CALLSIGN'] ?? $vals['Callsign'], 'Password' => $el['PASSWORD'] ?? '', 'Sysop' => $el['SYSOPNAME'] ?? '',
-        'Location' => $el['LOCATION'] ?? '', 'Desc' => $el['DESCRIPTION'] ?? '', 'Proxy' => $el['PROXY_SERVER'] ?? '',
-        'ModTimeout' => $el['TIMEOUT'] ?? '60', 'IdleTimeout' => $el['LINK_IDLE_TIMEOUT'] ?? '300',
+        'Desc' => $el['DESCRIPTION'] ?? '', 'Proxy' => $el['PROXY_SERVER'] ?? ''
     ];
 
     $jsonFile = '/var/www/html/radio_config.json';
     $radio = ["rx" => "432.8500", "tx" => "432.8500", "ctcss" => "0000", "sq" => "2"];
     if (file_exists($jsonFile)) { $loaded = json_decode(file_get_contents($jsonFile), true); if ($loaded) $radio = array_merge($radio, $loaded); }
 
-    // --- AKCJE ---
+    // --- 5. AKCJE SYSTEMOWE (Restart/Power/Update) ---
     if (isset($_POST['save_svx_full'])) {
         $newData = $_POST; unset($newData['save_svx_full'], $newData['active_tab']); file_put_contents('/tmp/svx_new_settings.json', json_encode($newData));
         shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1'); shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &');
         echo "<div class='alert alert-success'>Zapisano! Restart...</div><meta http-equiv='refresh' content='3'>";
     }
+    if (isset($_POST['restart_srv'])) { shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &'); echo "<div class='alert alert-success'>Restart Usługi...</div>"; }
+    if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
+    if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
     if (isset($_POST['git_update'])) {
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
         echo "<div class='alert alert-warning' style='text-align:left;'><strong>Wynik Aktualizacji:</strong><br><pre style='font-size:10px;'>$out</pre></div><meta http-equiv='refresh' content='5'>";
     }
+    if (isset($_POST['auto_proxy'])) { $out = shell_exec("sudo /usr/local/bin/proxy_hunter.py 2>&1"); echo "<div class='alert alert-warning'><strong>♻️ Auto-Proxy:</strong><br><small>$out</small></div><meta http-equiv='refresh' content='3'>"; }
+
+    // --- 6. WIFI (Dostosowane do RPi) ---
+    $wifi_output = "";
+    if (isset($_POST['wifi_scan'])) { shell_exec('sudo iwlist wlan0 scan'); }
+    if (isset($_POST['wifi_connect'])) { $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']); shell_exec("sudo /usr/local/bin/add_wifi.sh $ssid $pass"); }
+    
+    // Lista zapamiętanych sieci (RPi - wpa_supplicant)
+    $saved_wifi_list = [];
+    $conf = @file_get_contents('/etc/wpa_supplicant/wpa_supplicant.conf');
+    if ($conf) { preg_match_all('/ssid="([^"]+)"/', $conf, $matches); if (!empty($matches[1])) $saved_wifi_list = array_unique($matches[1]); }
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -156,7 +163,7 @@
     <div id="Help" class="tab-content"><?php include 'help.php'; ?></div>
     <div id="Logs" class="tab-content"><div id="log-content" class="log-box">...</div></div>
 </div>
-<div class="main-footer">SvxLink v1.9.99.36@master • <span class="callsign-blue">SQLink System</span> • SierraEcho & Team Edition<br>Design by <span class="callsign-blue">SQ7UTP</span></div>
+<div class="main-footer">SvxLink v1.9.99.36 • <span class="callsign-blue">SQLink System</span> • SierraEcho & Team Edition<br>Design by <span class="callsign-blue">SQ7UTP</span></div>
 <script>const GLOBAL_CALLSIGN = "<?php echo $vals['Callsign']; ?>";</script>
 <script src="script.js?v=<?php echo time(); ?>"></script>
 </body>
