@@ -1,12 +1,12 @@
 <?php
-    // --- 1. API TELEMETRII ---
+    // --- 1. API TELEMETRII (Raspberry Pi) ---
     if (isset($_GET['ajax_stats'])) {
         header('Content-Type: application/json');
         $stats = [];
 
         // Hardware & Temp
         $model = @file_get_contents('/sys/firmware/devicetree/base/model');
-        $stats['hw'] = $model ? str_replace("\0", "", trim($model)) : "Generic Linux";
+        $stats['hw'] = $model ? str_replace("\0", "", trim($model)) : "Raspberry Pi";
         $temp_raw = @file_get_contents('/sys/class/thermal/thermal_zone0/temp');
         $stats['temp'] = $temp_raw ? round($temp_raw / 1000, 1) : 0;
 
@@ -48,101 +48,57 @@
         exit;
     }
 
-    // --- KONFIGURACJA AUDIO I RADIO CM108 ---
+    // --- KONFIGURACJA AUDIO (CM108 RPi Simple) ---
+    $CARD_ID = 0; 
 
-    $CARD_ID = 0; // ID Twojej karty CM108
-
+    // Prosty mixer dla RPi (CM108)
     $MIXER_IDS = [
-        'Mic_Cap_Sw' => 7,      // numid=7,iface=MIXER,name='Mic Capture Switch'
-        'Mic_Cap_Vol' => 8,     // numid=8,iface=MIXER,name='Mic Capture Volume'
-        'Auto_Gain_Ctrl' => 9,  // numid=9,iface=MIXER,name='Auto Gain Control'
-        'Spk_Play_Sw' => 5,     // numid=5,iface=MIXER,name='Speaker Playback Switch'
-        'Spk_Play_Vol' => 6     // numid=6,iface=MIXER,name='Speaker Playback Volume'
+        'Mic_Cap_Sw' => 7,      
+        'Mic_Cap_Vol' => 8,     
+        'Auto_Gain_Ctrl' => 9,  
+        'Spk_Play_Sw' => 5,     
+        'Spk_Play_Vol' => 6     
     ];
 
     $audio = [];
     $audio_msg = '';
 
-    // --- FUNKCJA ODCZYTU ALSA (Poprawiona) ---
     function get_alsa_value($card, $numid) {
-        // Używamy pełnej ścieżki do amixer, aby uniknąć problemów z uprawnieniami
         $cmd = "sudo /usr/bin/amixer -c $card cget numid=$numid 2>&1";
         $output = shell_exec($cmd);
-
-        // Próba odczytu wartości numerycznej (Volume)
-        if (preg_match('/: values=(\d+)/', $output, $matches)) {
-            return (int)$matches[1];
-        }
-        // Próba odczytu stanu 'on/off' (Switch)
-        if (preg_match('/: values=(on|off)/', $output, $matches)) {
-            return $matches[1] === 'on' ? 1 : 0;
-        }
-        return 0; // Wartość domyślna
+        if (preg_match('/: values=(\d+)/', $output, $matches)) return (int)$matches[1];
+        if (preg_match('/: values=(on|off)/', $output, $matches)) return $matches[1] === 'on' ? 1 : 0;
+        return 0;
     }
 
-    // --- LOGIKA ZAPISU I ODCZYTU ---
-
-    // A) Obsługa zapisu ustawień z formularza
     if (isset($_POST['save_audio'])) {
         $audio_data = $_POST;
-        
-        // 1. Zapisywanie suwaków (Volume)
         foreach (['mic_cap_vol' => 'Mic_Cap_Vol', 'spk_play_vol' => 'Spk_Play_Vol'] as $post_name => $mix_name) {
             $numid = $MIXER_IDS[$mix_name];
             $val = (int)$audio_data[$post_name];
-            if ($numid > 0) {
-                 shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=$numid $val");
-            }
+            if ($numid > 0) shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=$numid $val");
         }
-
-        // 2. Zapisywanie przełączników (Switch)
         foreach (['Mic_Cap_Sw', 'Auto_Gain_Ctrl', 'Spk_Play_Sw'] as $mix_name) {
             $numid = $MIXER_IDS[$mix_name];
             $state = isset($audio_data[$mix_name]) && $audio_data[$mix_name] == '1' ? 'on' : 'off';
-            if ($numid > 0) {
-                 shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=$numid $state");
-            }
+            if ($numid > 0) shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=$numid $state");
         }
-        
-        // 3. Zapisanie stanu ALSA do pliku (KLUCZOWY KROK DLA TRWAŁOŚCI)
         shell_exec("sudo /usr/sbin/alsactl store $CARD_ID");
-
-        $audio_msg = '<div class="alert alert-success">✅ Ustawienia audio ZAPISANE i zastosowane.</div>';
+        $audio_msg = '<div class="alert alert-success">✅ Audio ZAPISANE.</div>';
     }
 
-    // B) Obsługa resetu do fabrycznych - Wywołuje skrypt reset_audio.sh
     if (isset($_POST['reset_audio_defaults'])) {
         $output = shell_exec("sudo /usr/local/bin/reset_audio.sh 2>&1");
-        $audio_msg = "<div class='alert alert-warning' style='border-color: #FF9800; color: #FF9800;'><strong>⚠️ Reset Audio:</strong><pre style='text-align:left; font-size:11px;'>$output</pre></div>";
+        $audio_msg = "<div class='alert alert-warning'><strong>⚠️ Reset:</strong> $output</div>";
     }
 
-    // C) Odczyt aktualnych ustawień ALSA na potrzeby wyświetlenia (wykonywany zawsze)
     foreach ($MIXER_IDS as $key => $numid) {
-        if ($numid > 0) {
-            $audio[$key] = get_alsa_value($CARD_ID, $numid);
-        } else {
-            $audio[$key] = 0;
-        }
+        $audio[$key] = ($numid > 0) ? get_alsa_value($CARD_ID, $numid) : 0;
     }
-    
-    // --- KONIEC KONFIGURACJA AUDIO I RADIO CM108 ---
 
-    $CTCSS_MAP = [
-        "0000" => "Brak (Wyłączony)", "0670" => "67.0 Hz", "0719" => "71.9 Hz",
-        "0744" => "74.4 Hz", "0770" => "77.0 Hz",
-        "0797" => "79.7 Hz", "0825" => "82.5 Hz", "0854" => "85.4 Hz", "0885" => "88.5 Hz", "0915" => "91.5 Hz",
-        "0948" => "94.8 Hz", "0974" => "97.4 Hz", "1000" => "100.0 Hz", "1035" => "103.5 Hz", "1072" => "107.2 Hz",
-        "1109" => "110.9 Hz", "1148" => "114.8 Hz", "1188" => "118.8 Hz", "1230" => "123.0 Hz", "1273" => "127.3 Hz",
-        "1318" => "131.8 Hz", "1365" => "136.5 Hz", "1413" => "141.3 Hz", "1462" => "146.2 Hz", "1514" => "151.4 Hz",
-        "1567" => "156.7 Hz", "1622" => "162.2 Hz", "1679" => "167.9 Hz", "1738" => "173.8 Hz", "1799" => "179.9 Hz",
-        "1862" => "186.2 Hz", "1928" => "192.8 Hz", "2035" => "203.5 Hz", "2107" => "210.7 Hz", "2181" => "218.1 Hz",
-        "2257" => "225.7 Hz", "2336" => "233.6 Hz", "2418" => "241.8 Hz", "2503" => "250.3 Hz"
-    ];
-
-    // --- PARSOWANIE CONFIGU ---
+    // --- CONFIG SVXLINK ---
     function parse_svx_conf($file) {
         $ini = []; $curr = "GLOBAL";
-        // Używamy '/etc/svxlink/svxlink.conf' zamiast '/etc/svxlink/svxlink.conf'
         if (!file_exists($file)) return [];
         foreach (file($file) as $line) {
             $line = trim($line);
@@ -152,21 +108,12 @@
         }
         return $ini;
     }
-    // UWAGA: Używamy prawidłowej ścieżki do Twojego pliku configa
     $ini = parse_svx_conf('/etc/svxlink/svxlink.conf');
     $ref = $ini['ReflectorLogic'] ?? []; $simp = $ini['SimplexLogic'] ?? []; $glob = $ini['GLOBAL'] ?? []; $el = $ini['ModuleEchoLink'] ?? [];
 
     $vals = [
         'Callsign' => $ref['CALLSIGN'] ?? 'N0CALL', 'Host' => $ref['HOSTS'] ?? '', 'Port' => $ref['HOST_PORT'] ?? '', 'Password' => $ref['AUTH_KEY'] ?? '',
-        'DefaultTG' => $ref['DEFAULT_TG'] ?? '0', 'MonitorTGs' => $ref['MONITOR_TGS'] ?? '', 'TgTimeout' => $ref['TG_SELECT_TIMEOUT'] ?? '60',
-        'TmpTimeout' => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600', 'Modules' => $simp['MODULES'] ?? 'Help,Parrot,EchoLink',
-        'Beep3Tone' => $ref['TGSTBEEP_ENABLE'] ?? '0', 'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0', 'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0',
-        'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
-    ];
-    $vals_el = [
-        'Callsign' => $el['CALLSIGN'] ?? $vals['Callsign'], 'Password' => $el['PASSWORD'] ?? '', 'Sysop' => $el['SYSOPNAME'] ?? '',
-        'Location' => $el['LOCATION'] ?? '', 'Desc' => $el['DESCRIPTION'] ?? '', 'Proxy' => $el['PROXY_SERVER'] ?? '',
-        'ModTimeout' => $el['TIMEOUT'] ?? '60', 'IdleTimeout' => $el['LINK_IDLE_TIMEOUT'] ?? '300',
+        'DefaultTG' => $ref['DEFAULT_TG'] ?? '0', 'Modules' => $simp['MODULES'] ?? 'Help,Parrot,EchoLink'
     ];
 
     $jsonFile = '/var/www/html/radio_config.json';
@@ -186,38 +133,31 @@
         $out = shell_exec($cmd); shell_exec('sudo /usr/bin/systemctl start svxlink'); echo "<div class='alert alert-success'>Radio: $out</div>";
     }
 
-    // ZASILANIE
     if (isset($_POST['restart_srv'])) { shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &'); echo "<div class='alert alert-success'>Restart Usługi...</div>"; }
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
     if (isset($_POST['auto_proxy'])) { $out = shell_exec("sudo /usr/local/bin/proxy_hunter.py 2>&1"); echo "<div class='alert alert-warning'><strong>♻️ Auto-Proxy:</strong><br><small>$out</small></div><meta http-equiv='refresh' content='3'>"; }
+    
+    // --- KLUCZOWY MOMENT AKTUALIZACJI ---
     if (isset($_POST['git_update'])) {
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
         echo "<div class='alert alert-warning' style='text-align:left;'><strong>Wynik Aktualizacji:</strong><br><pre style='font-size:10px;'>$out</pre></div>";
         echo "<meta http-equiv='refresh' content='5'>";
     }
+    
+    // WiFi Scan & Connect
     $wifi_output = "";
     if (isset($_POST['wifi_scan'])) { shell_exec('sudo nmcli dev wifi rescan'); $raw = shell_exec('sudo nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>&1'); $lines = explode("\n", $raw); foreach($lines as $line) { if(empty($line)) continue; $parts = explode(':', $line); $sec = array_pop($parts); $sig = array_pop($parts); $ssid = implode(':', $parts); if(!empty($ssid)) $wifi_scan_results[$ssid] = ['ssid'=>$ssid, 'signal'=>$sig, 'sec'=>$sec]; } usort($wifi_scan_results, function($a, $b) { return $b['signal'] - $a['signal']; }); }
-
-    // Lista zapamiętanych sieci WiFi
+    
     $saved_wifi_list = [];
     $saved_raw = shell_exec("sudo nmcli -t -f NAME,TYPE connection show | grep '802-11-wireless' | grep -v 'Rescue_AP'");
     if($saved_raw) {
         $s_lines = explode("\n", trim($saved_raw));
-        foreach($s_lines as $s_line) {
-            $s_parts = explode(":", $s_line);
-            if(count($s_parts) >= 1) {
-                $saved_wifi_list[] = $s_parts[0];
-            }
-        }
+        foreach($s_lines as $s_line) { $s_parts = explode(":", $s_line); if(count($s_parts) >= 1) { $saved_wifi_list[] = $s_parts[0]; } }
     }
 
     if (isset($_POST['wifi_connect'])) { $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']); $wifi_output = shell_exec("sudo nmcli dev wifi connect $ssid password $pass 2>&1"); }
-    if (isset($_POST['wifi_delete'])) {
-        $ssid = escapeshellarg($_POST['ssid']);
-        $wifi_output = shell_exec("sudo nmcli connection delete $ssid 2>&1");
-        echo "<div class='alert alert-warning'>Usunięto sieć: ".htmlspecialchars($_POST['ssid'])."</div><meta http-equiv='refresh' content='2'>";
-    }
+    if (isset($_POST['wifi_delete'])) { $ssid = escapeshellarg($_POST['ssid']); $wifi_output = shell_exec("sudo nmcli connection delete $ssid 2>&1"); echo "<div class='alert alert-warning'>Usunięto sieć: ".htmlspecialchars($_POST['ssid'])."</div><meta http-equiv='refresh' content='2'>"; }
 ?>
 
 <!DOCTYPE html>
@@ -293,41 +233,15 @@
         <button id="btn-Help" class="tab-btn" onclick="openTab(event, 'Help')">Pomoc</button>
     </div>
 
-    <div id="Dashboard" class="tab-content active">
-        <?php include 'tab_dashboard.php'; ?>
-    </div>
-    <div id="Radio" class="tab-content">
-    	<?php include 'tab_radio.php'; ?>
-    </div>
-    <div id="DTMF" class="tab-content">
-        <?php include 'tab_dtmf.php'; ?>
-    </div>
-
-    <div id="Audio" class="tab-content">
-        <?php include 'tab_audio.php'; ?>
-    </div>
-
-
-    <div id="SvxConfig" class="tab-content">
-        <?php include 'tab_config.php'; ?>
-    </div>
-
-    <div id="WiFi" class="tab-content">
-        <?php include 'tab_wifi.php'; ?>
-    </div>
-
-    <div id="Power" class="tab-content">
-        <?php include 'tab_power.php'; ?>
-    </div>
-
-    <div id="Nodes" class="tab-content">
-        <?php include 'tab_nodes.php'; ?>
-    </div>
-
-    <div id="Help" class="tab-content">
-        <?php include 'help.php'; ?>
-    </div>
-
+    <div id="Dashboard" class="tab-content active"><?php include 'tab_dashboard.php'; ?></div>
+    <div id="Radio" class="tab-content"><?php include 'tab_radio.php'; ?></div>
+    <div id="DTMF" class="tab-content"><?php include 'tab_dtmf.php'; ?></div>
+    <div id="Audio" class="tab-content"><?php include 'tab_audio.php'; ?></div>
+    <div id="SvxConfig" class="tab-content"><?php include 'tab_config.php'; ?></div>
+    <div id="WiFi" class="tab-content"><?php include 'tab_wifi.php'; ?></div>
+    <div id="Power" class="tab-content"><?php include 'tab_power.php'; ?></div>
+    <div id="Nodes" class="tab-content"><?php include 'tab_nodes.php'; ?></div>
+    <div id="Help" class="tab-content"><?php include 'help.php'; ?></div>
     <div id="Logs" class="tab-content"><div id="log-content" class="log-box">...</div></div>
 </div>
 
