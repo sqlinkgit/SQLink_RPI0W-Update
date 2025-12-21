@@ -57,7 +57,7 @@
     }
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
-    // --- 4. PARSOWANIE CONFIGU (RPi Fix) ---
+    // --- 4. PARSOWANIE CONFIGU (Poprawione mapowanie dla przełączników) ---
     function parse_svx_conf($file) {
         $ini = []; $curr = "GLOBAL"; if (!file_exists($file)) return [];
         foreach (file($file) as $line) {
@@ -70,13 +70,19 @@
     $ref = $ini['ReflectorLogic'] ?? []; $simp = $ini['SimplexLogic'] ?? []; $glob = $ini['GLOBAL'] ?? []; $el = $ini['ModuleEchoLink'] ?? [];
 
     $vals = [
-        'Callsign' => $ref['CALLSIGN'] ?? $simp['CALLSIGN'] ?? 'N0CALL',
-        'Password' => $ref['AUTH_KEY'] ?? '', 'Host' => $ref['HOSTS'] ?? '', 'Port' => $ref['HOST_PORT'] ?? '',
-        'DefaultTG' => $ref['DEFAULT_TG'] ?? '0', 'MonitorTGs' => $ref['MONITOR_TGS'] ?? '',
-        'TgTimeout' => $ref['TG_SELECT_TIMEOUT'] ?? '60', 'TmpTimeout' => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600',
-        'Beep3Tone' => $ref['TGSTBEEP_ENABLE'] ?? '0', 'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0',
-        'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0', 'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
-        'Modules' => $simp['MODULES'] ?? 'Help,Parrot,EchoLink'
+        'Callsign'      => $ref['CALLSIGN'] ?? $simp['CALLSIGN'] ?? 'N0CALL',
+        'Password'      => $ref['AUTH_KEY'] ?? '',
+        'Host'          => $ref['HOSTS'] ?? '',
+        'Port'          => $ref['HOST_PORT'] ?? '',
+        'DefaultTG'     => $ref['DEFAULT_TG'] ?? '0',
+        'MonitorTGs'    => $ref['MONITOR_TGS'] ?? '',
+        'TgTimeout'     => $ref['TG_SELECT_TIMEOUT'] ?? '60',
+        'TmpTimeout'    => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600',
+        'Beep3Tone'     => $ref['TGSTBEEP_ENABLE'] ?? '0',      // Poprawione mapowanie
+        'AnnounceTG'    => $ref['TGREANON_ENABLE'] ?? '0',     // Poprawione mapowanie
+        'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0',       // Poprawione mapowanie
+        'RogerBeep'     => $simp['RGR_SOUND_ALWAYS'] ?? '0',   // Roger Beep z SimplexLogic
+        'Modules'       => $simp['MODULES'] ?? 'Help,Parrot,EchoLink'
     ];
     $vals_el = [
         'Callsign' => $el['CALLSIGN'] ?? $vals['Callsign'], 'Password' => $el['PASSWORD'] ?? '', 'Sysop' => $el['SYSOPNAME'] ?? '',
@@ -87,7 +93,7 @@
     $radio = ["rx" => "432.8500", "tx" => "432.8500", "ctcss" => "0000", "sq" => "2"];
     if (file_exists($jsonFile)) { $loaded = json_decode(file_get_contents($jsonFile), true); if ($loaded) $radio = array_merge($radio, $loaded); }
 
-    // --- 5. AKCJE SYSTEMOWE (Restart/Power/Update) ---
+    // --- 5. AKCJE SYSTEMOWE ---
     if (isset($_POST['save_svx_full'])) {
         $newData = $_POST; unset($newData['save_svx_full'], $newData['active_tab']); file_put_contents('/tmp/svx_new_settings.json', json_encode($newData));
         shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1'); shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &');
@@ -102,15 +108,11 @@
     }
     if (isset($_POST['auto_proxy'])) { $out = shell_exec("sudo /usr/local/bin/proxy_hunter.py 2>&1"); echo "<div class='alert alert-warning'><strong>♻️ Auto-Proxy:</strong><br><small>$out</small></div><meta http-equiv='refresh' content='3'>"; }
 
-    // --- 6. WIFI (Dostosowane do RPi) ---
-    $wifi_output = "";
-    if (isset($_POST['wifi_scan'])) { shell_exec('sudo iwlist wlan0 scan'); }
-    if (isset($_POST['wifi_connect'])) { $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']); shell_exec("sudo /usr/local/bin/add_wifi.sh $ssid $pass"); }
-    
-    // Lista zapamiętanych sieci (RPi - wpa_supplicant)
+    // --- 6. WIFI (RPi Zero W) ---
     $saved_wifi_list = [];
     $conf = @file_get_contents('/etc/wpa_supplicant/wpa_supplicant.conf');
     if ($conf) { preg_match_all('/ssid="([^"]+)"/', $conf, $matches); if (!empty($matches[1])) $saved_wifi_list = array_unique($matches[1]); }
+    if (isset($_POST['wifi_connect'])) { $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']); shell_exec("sudo /usr/local/bin/add_wifi.sh $ssid $pass"); }
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -133,10 +135,10 @@
 
     <div class="telemetry-row">
         <div class="t-box"><div class="t-label">CPU Temp</div><div class="t-val" id="t-temp">...</div><div class="progress-bg"><div class="progress-fill" id="t-temp-bar" style="width: 0%;"></div></div></div>
-        <div class="t-box"><div class="t-label">RAM Used</div><div class="t-val" id="t-ram">...</div><div class="progress-bg"><div class="progress-fill" id="t-ram-bar" style="width: 0%;"></div></div></div>
-        <div class="t-box"><div class="t-label">Disk Used</div><div class="t-val" id="t-disk">...</div><div class="progress-bg"><div class="progress-fill" id="t-disk-bar" style="width: 0%;"></div></div></div>
-        <div class="t-box"><div class="t-label">Network</div><div class="t-val" id="t-net-type">...</div><div style="font-size:9px; color:#aaa;" id="t-ip">...</div></div>
-        <div class="t-box"><div class="t-label">Hardware</div><div class="t-val" id="t-hw" style="font-size:10px; margin-top:5px;">...</div></div>
+        <div class="t-box"><div class="t-label">RAM Used</div><div class="t-val" id=\"t-ram\">...</div><div class="progress-bg"><div class="progress-fill" id="t-ram-bar" style="width: 0%;"></div></div></div>
+        <div class="t-box"><div class="t-label">Disk Used</div><div class="t-val" id=\"t-disk\">...</div><div class="progress-bg"><div class="progress-fill" id="t-disk-bar" style="width: 0%;"></div></div></div>
+        <div class="t-box"><div class="t-label">Network</div><div class="t-val" id=\"t-net-type\">...</div><div style="font-size:9px; color:#aaa;" id="t-ip">...</div></div>
+        <div class="t-box"><div class="t-label">Hardware</div><div class="t-val" id=\"t-hw\" style="font-size:10px; margin-top:5px;">...</div></div>
     </div>
 
     <div class="tabs">
