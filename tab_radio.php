@@ -1,24 +1,17 @@
 <?php
-// --- OBSŁUGA ZAPISU DANYCH DO PLIKU JSON ---
 $jsonFile = '/var/www/html/radio_config.json';
-
-// Domyślne wartości
 $radio_display = [
     "rx" => "432.8000",
     "tx" => "432.8000",
     "ctcss" => "0000",
     "desc" => "Baofeng / Quansheng"
 ];
-
-// Odczyt
 if (file_exists($jsonFile)) {
     $loaded = json_decode(file_get_contents($jsonFile), true);
     if ($loaded) {
         $radio_display = array_merge($radio_display, $loaded);
     }
 }
-
-// Zapis
 if (isset($_POST['update_radio_display'])) {
     $newData = [
         "rx" => $_POST['rx_freq'],
@@ -31,7 +24,6 @@ if (isset($_POST['update_radio_display'])) {
     echo "<div class='alert alert-success'>✅ Opis Dashboardu został zaktualizowany!</div>";
     echo "<meta http-equiv='refresh' content='2'>";
 }
-
 $CTCSS_MAP = [
     "0000" => "Brak (CSQ)", "0670" => "67.0 Hz", "0719" => "71.9 Hz", "0744" => "74.4 Hz", "0770" => "77.0 Hz",
     "0797" => "79.7 Hz", "0825" => "82.5 Hz", "0854" => "85.4 Hz", "0885" => "88.5 Hz", "0915" => "91.5 Hz",
@@ -43,24 +35,19 @@ $CTCSS_MAP = [
     "2257" => "225.7 Hz", "2336" => "233.6 Hz", "2418" => "241.8 Hz", "2503" => "250.3 Hz"
 ];
 ?>
-
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-
     <div class="panel-box" style="border-top: 3px solid #2196F3;">
         <h4 class="panel-title blue">📝 Edycja Opisu Dashboardu</h4>
         <div style="font-size: 12px; color: #aaa; margin-bottom: 15px; font-style: italic;">
             Tutaj wprowadź dane, które masz <b>fizycznie</b> ustawione w radiu. <br>
             Te informacje pojawią się w nagłówku strony.
         </div>
-        
         <form method="post">
             <input type="hidden" name="active_tab" class="active-tab-input" value="Radio">
-            
             <div class="form-group">
                 <label>Opis Sprzętu (np. Model Radia)</label>
                 <input type="text" name="radio_desc" value="<?php echo htmlspecialchars($radio_display['desc']); ?>" placeholder="np. Baofeng UV-5R">
             </div>
-
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div class="form-group">
                     <label>RX Freq (MHz)</label>
@@ -71,7 +58,6 @@ $CTCSS_MAP = [
                     <input type="text" name="tx_freq" value="<?php echo htmlspecialchars($radio_display['tx']); ?>">
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Ton CTCSS (Blokada)</label>
                 <select name="ctcss_tone">
@@ -83,33 +69,31 @@ $CTCSS_MAP = [
                     ?>
                 </select>
             </div>
-
             <button type="submit" name="update_radio_display" class="btn btn-blue">💾 Zaktualizuj Wizytówkę</button>
         </form>
     </div>
-
     <div>
         <div class="panel-box" style="border-left: 5px solid #FF9800; background: #26201b;">
             <h4 class="panel-title" style="color: #FF9800; border: none;">⚠️ Ustawienia Audio (KRYTYCZNE)</h4>
             <div style="font-size: 13px; color: #ddd; line-height: 1.6;">
-                Aby karta dźwiękowa (CM108) nie była przesterowana, sprawdź w MENU radia:
+                Pamiętaj: <b>Pokrętło głośności w radiu</b> (np. Quansheng) steruje tym, jak głośno słyszą Cię inni w sieci!
                 <ul style="list-style: none; padding: 0; margin-top: 10px;">
                     <li style="margin-bottom: 8px;">
-                        🚫 <b>MIC GAIN / WZMOCNIENIE:</b> <span style="color: #FF9800; font-weight: bold;">OFF / MINIMUM</span>
-                        <br><small style="color: #bbb;">Zbyt wysokie wzmocnienie = "Distortion detected".</small>
+                        🎚️ <b>Głośność w radiu:</b> Ustaw pokrętło na <b>ok. 30-40%</b>.
+                        <br><small style="color: #bbb;">Zbyt głośno = charczenie i "Distortion detected".</small>
                     </li>
                     <li style="margin-bottom: 8px;">
-                        🔇 <b>COMPANDER:</b> <span style="color: #FF9800; font-weight: bold;">OFF</span>
-                        <br><small style="color: #bbb;">Wyłącz cyfrowe "ulepszacze" dźwięku.</small>
+                        🚫 <b>MIC GAIN w Menu:</b> Ustaw na <b>OFF / MINIMUM</b>.
                     </li>
-                    <li>
-                        🎚️ <b>Głośność (Volume):</b>
-                        <br><small style="color: #bbb;">Jeśli gałka wpływa na wyjście - ustaw max 30-40%.</small>
+                    <li style="margin-bottom: 8px;">
+                        🔇 <b>COMPANDER:</b> Musi być <b>OFF</b>.
                     </li>
                 </ul>
+                <div style="background: rgba(255,152,0,0.1); padding: 5px; border: 1px dashed #FF9800; font-size: 11px; margin-top: 5px;">
+                    💡 <b>Wskazówka:</b> Jeśli koledzy mówią, że jesteś za cicho, najpierw lekko podkręć głośność w radiu, zanim zaczniesz zmieniać czułość w zakładce Audio.
+                </div>
             </div>
         </div>
-
         <div class="panel-box" style="border-top: 3px solid #4CAF50;">
             <h4 class="panel-title green">✅ Pozostałe Ustawienia Radia</h4>
             <div style="font-size: 13px; color: #ccc;">
@@ -120,7 +104,6 @@ $CTCSS_MAP = [
                         <br><small>Absolutnie konieczne!</small>
                     </div>
                 </div>
-
                 <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
                     <div style="font-size: 20px; margin-right: 10px;">🔋</div>
                     <div>
@@ -128,7 +111,6 @@ $CTCSS_MAP = [
                         <br><small>Tryb oszczędzania ucina początek rozmowy.</small>
                     </div>
                 </div>
-                
                 <div style="display: flex; align-items: center;">
                     <div style="font-size: 20px; margin-right: 10px;">📟</div>
                     <div>
@@ -138,10 +120,8 @@ $CTCSS_MAP = [
                 </div>
             </div>
         </div>
-        
     </div>
 </div>
-
 <div class="panel-box" style="margin-top: 20px; text-align: center; color: #888; font-size: 11px; padding: 10px;">
     <strong>ℹ️ DIY Interface (Schemat):</strong><br>
     <span style="color: #E91E63;">● Duży Jack (3.5mm)</span>: MIC+ (Pierścień) / PTT-GND (Tuleja) ➜ Sygnał Z RPi<br>
