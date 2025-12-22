@@ -32,10 +32,11 @@
         } else { echo "ERROR"; } exit;
     }
 
-    // --- 3. AUDIO (RPi Simple Mixer) ---
+    // --- 3. AUDIO (RPi Simple Mixer + Nowe Funkcje) ---
     $CARD_ID = 0;
     $MIXER_IDS = ['Mic_Cap_Sw' => 7, 'Mic_Cap_Vol' => 8, 'Auto_Gain_Ctrl' => 9, 'Spk_Play_Sw' => 5, 'Spk_Play_Vol' => 6];
     $audio = []; $audio_msg = '';
+    
     function get_alsa_value($card, $numid) {
         $cmd = "sudo /usr/bin/amixer -c $card cget numid=$numid 2>&1";
         $output = shell_exec($cmd);
@@ -43,6 +44,8 @@
         if (preg_match('/: values=(on|off)/', $output, $matches)) return $matches[1] === 'on' ? 1 : 0;
         return 0;
     }
+
+    // Zapis Audio (Suwaki)
     if (isset($_POST['save_audio'])) {
         foreach (['mic_cap_vol' => 'Mic_Cap_Vol', 'spk_play_vol' => 'Spk_Play_Vol'] as $p => $m) {
             $numid = $MIXER_IDS[$m]; $val = (int)$_POST[$p];
@@ -55,6 +58,19 @@
         shell_exec("sudo /usr/sbin/alsactl store $CARD_ID");
         $audio_msg = '<div class="alert alert-success">✅ Audio ZAPISANE.</div>';
     }
+
+    // [NOWE] Reset Audio do bezpiecznych wartości
+    if (isset($_POST['reset_audio_defaults'])) {
+        // Ustawienia bezpieczne dla CM108
+        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=7 1");  // Mic On
+        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=8 25"); // Mic Vol ~70%
+        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=9 0");  // AGC Off
+        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=5 1");  // Spk On
+        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=6 30"); // Spk Vol ~80%
+        shell_exec("sudo /usr/sbin/alsactl store $CARD_ID");
+        $audio_msg = '<div class="alert alert-warning">♻️ Przywrócono domyślne ustawienia Audio.</div>';
+    }
+
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
     // --- 4. PARSOWANIE CONFIGU SVXLINK ---
@@ -84,45 +100,90 @@
     ];
 
     $jsonFile = '/var/www/html/radio_config.json';
-    $radio = ["rx" => "432.8500", "tx" => "432.8500", "ctcss" => "0000", "sq" => "2"];
+    $radio = ["rx" => "432.8500", "tx" => "432.8500", "ctcss" => "0000", "sq" => "2", "desc" => "Brak opisu"];
     if (file_exists($jsonFile)) { $loaded = json_decode(file_get_contents($jsonFile), true); if ($loaded) $radio = array_merge($radio, $loaded); }
 
-    // --- 5. AKCJE SYSTEMOWE ---
+    // --- 5. AKCJE SYSTEMOWE I CONFIG ---
     if (isset($_POST['save_svx_full'])) {
-        $newData = $_POST; unset($newData['save_svx_full'], $newData['active_tab']); file_put_contents('/tmp/svx_new_settings.json', json_encode($newData));
-        shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1'); shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &');
+        $newData = $_POST; unset($newData['save_svx_full'], $newData['active_tab']); 
+        file_put_contents('/tmp/svx_new_settings.json', json_encode($newData));
+        shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1'); 
+        shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &');
         echo "<div class='alert alert-success'>Zapisano! Restart...</div><meta http-equiv='refresh' content='3'>";
     }
+    
+    // [NOWE] Obsługa Auto-Proxy
+    if (isset($_POST['auto_proxy'])) {
+        if (file_exists('/usr/local/bin/auto_proxy.py')) {
+             shell_exec('sudo /usr/bin/python3 /usr/local/bin/auto_proxy.py > /dev/null 2>&1 &');
+             echo "<div class='alert alert-warning'>♻️ Uruchomiono Auto-Proxy. SvxLink zrestartuje się za chwilę...</div>";
+        } else {
+             echo "<div class='alert alert-error'>❌ Błąd: Brak skryptu /usr/local/bin/auto_proxy.py</div>";
+        }
+    }
+
+    // --- GPIO / SETUP RADIO ---
+    if (isset($_POST['gpio_setup'])) {
+        shell_exec("sudo /usr/bin/python3 /usr/local/bin/setup_radio.py > /dev/null 2>&1");
+        echo "<div class='alert alert-success'>Konfiguracja Karty/GPIO zaktualizowana!</div><meta http-equiv='refresh' content='2'>";
+    }
+
     if (isset($_POST['restart_srv'])) { shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &'); echo "<div class='alert alert-success'>Restart Usługi...</div>"; }
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
+    
+    // --- GIT UPDATE ---
     if (isset($_POST['git_update'])) {
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
         echo "<div class='alert alert-warning' style='text-align:left;'><strong>Wynik Aktualizacji:</strong><br><pre style='font-size:10px;'>$out</pre></div><meta http-equiv='refresh' content='5'>";
     }
 
-    // --- 6. WIFI (RPi Zero W Fix) ---
+    // --- 6. WIFI (NMCLI) ---
     if (isset($_POST['wifi_scan'])) {
-        $scan = shell_exec('sudo /sbin/iwlist wlan0 scan | grep ESSID');
-        preg_match_all('/ESSID:"([^"]+)"/', $scan, $m);
-        if (!empty($m[1])) {
-            foreach(array_unique($m[1]) as $s) { $wifi_scan_results[] = ['ssid'=>$s, 'signal'=>'?']; }
+        $output = shell_exec("sudo /usr/bin/nmcli -f SSID,SIGNAL dev wifi list 2>&1");
+        $lines = explode("\n", $output);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line) || strpos($line, "SSID") !== false || strpos($line, "--") !== false) continue;
+            $parts = preg_split('/\s+/', $line);
+            $ssid_part = $parts[0];
+            $signal_part = end($parts);
+            if (!empty($ssid_part) && $ssid_part != "--") {
+                 $wifi_scan_results[] = ['ssid' => $ssid_part, 'signal' => $signal_part];
+            }
         }
     }
+    
     if (isset($_POST['wifi_connect'])) {
-        $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']);
-        shell_exec("sudo /usr/local/bin/add_wifi.sh $ssid $pass");
-        echo "<div class='alert alert-success'>Próba połączenia z $ssid...</div>";
-    }
-    if (isset($_POST['wifi_delete'])) {
-        $ssid = escapeshellarg($_POST['ssid']);
-        shell_exec("sudo /usr/local/bin/del_wifi.sh $ssid");
-        echo "<div class='alert alert-warning'>Usunięto sieć: ".htmlspecialchars($_POST['ssid'])."</div><meta http-equiv='refresh' content='2'>";
+        $ssid = $_POST['ssid']; 
+        $pass = $_POST['pass'];
+        shell_exec("sudo /usr/bin/nmcli dev wifi connect " . escapeshellarg($ssid) . " password " . escapeshellarg($pass) . " > /dev/null 2>&1 &");
+        echo "<div class='alert alert-success'>Wysłano polecenie połączenia z siecią: $ssid</div>";
     }
 
+    if (isset($_POST['wifi_delete'])) {
+        $ssid = $_POST['ssid'];
+        shell_exec("sudo /usr/bin/nmcli connection delete " . escapeshellarg($ssid) . " > /dev/null 2>&1 &");
+        echo "<div class='alert alert-warning'>Usuwanie sieci: $ssid</div><meta http-equiv='refresh' content='2'>";
+    }
+
+    // Pobieranie listy zapamiętanych sieci przez NMCLI (z ukrywaniem Rescue_AP)
     $saved_wifi_list = [];
-    $conf = @file_get_contents('/etc/wpa_supplicant/wpa_supplicant.conf');
-    if ($conf) { preg_match_all('/ssid="([^"]+)"/', $conf, $matches); if (!empty($matches[1])) $saved_wifi_list = array_unique($matches[1]); }
+    $nm_saved = shell_exec("sudo /usr/bin/nmcli -t -f NAME connection show 2>/dev/null");
+    if ($nm_saved) {
+        $lines = explode("\n", trim($nm_saved));
+        foreach($lines as $l) {
+            $l = trim($l);
+            // FILTR: Ukrywamy "Wired", "lo" oraz sieci ratunkowe
+            if(!empty($l) 
+               && $l != "Wired connection 1" 
+               && $l != "lo" 
+               && $l != "Rescue_AP" 
+               && $l != "SQLink_WiFi_AP") {
+                $saved_wifi_list[] = $l;
+            }
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -175,7 +236,13 @@
     <div id="Help" class="tab-content"><?php include 'help.php'; ?></div>
     <div id="Logs" class="tab-content"><div id="log-content" class="log-box">...</div></div>
 </div>
-<div class="main-footer">SvxLink v1.9.99.36@master Copyright (C) 2003-2025 Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>Design by <span class="callsign-blue">SQ7UTP</span></div>
+
+<div class="main-footer">
+    SvxLink v1.9.99.36@master Copyright (C) 2003-2025 Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>
+    <span class="callsign-blue">SQLink System</span> • <span style="color: #ffffff;">SierraEcho & Team Edition</span><br>
+    Website design by <span class="callsign-blue">SQ7UTP</span>
+</div>
+
 <script>const GLOBAL_CALLSIGN = "<?php echo $vals['Callsign']; ?>";</script>
 <script src="script.js?v=<?php echo time(); ?>"></script>
 </body>
