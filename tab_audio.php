@@ -2,9 +2,11 @@
 
 <div style="border: 1px solid #444; border-left: 5px solid #2196F3; padding: 15px; margin-bottom: 25px; background: rgba(33, 150, 243, 0.1); border-radius: 4px;">
     <h4 style="margin-top: 0; margin-bottom: 10px; color: #2196F3;">🎧 Diagnostyka Karty Dźwiękowej</h4>
-    <p style="font-size: 0.9em; color: #ccc; margin-bottom: 15px;">
-        Jeśli po zmianie portu USB lub wgraniu backupu nie ma dźwięku, użyj tego przycisku. System sam znajdzie kartę i poprawi konfigurację.
-    </p>
+    
+    <div style="font-size: 0.95em; color: #ccc; margin-bottom: 15px; line-height: 1.5;">
+        Jeśli po zmianie portu USB lub wgraniu backupu <b>nie ma dźwięku</b>, użyj tego przycisku.<br>
+        System sam <b>znajdzie kartę</b> i automatycznie poprawi konfigurację.
+    </div>
     
     <form method="post">
         <input type="hidden" name="active_tab" class="active-tab-input" value="Audio">

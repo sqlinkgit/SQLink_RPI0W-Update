@@ -76,7 +76,14 @@ $CTCSS_MAP = [
         <div class="panel-box" style="border-left: 5px solid #FF9800; background: #26201b;">
             <h4 class="panel-title" style="color: #FF9800; border: none;">⚠️ Ustawienia Audio (KRYTYCZNE)</h4>
             <div style="font-size: 13px; color: #ddd; line-height: 1.6;">
-                Pamiętaj: <b>Pokrętło głośności w radiu</b> (np. Quansheng) steruje tym, jak głośno słyszą Cię inni w sieci!
+                
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px;">
+                    <div style="font-size: 24px;">☝️</div>
+                    <div>
+                        <b style="color: #FF9800;">PAMIĘTAJ:</b> Pokrętło głośności w Twoim radiu (np. Quansheng) steruje tym, jak <u>głośno słyszą Cię inni</u> w sieci!
+                    </div>
+                </div>
+
                 <ul style="list-style: none; padding: 0; margin-top: 10px;">
                     <li style="margin-bottom: 8px;">
                         🎚️ <b>Głośność w radiu:</b> Ustaw pokrętło na <b>ok. 30-40%</b>.
