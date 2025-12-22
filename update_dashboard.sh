@@ -72,16 +72,12 @@ if [ -f "$CLEANER_SCRIPT" ]; then
 fi
 
 # --- 8. FIX WIFI POWER SAVE (METODA NETWORK MANAGER) ---
-# To jest pewniejsza metoda niż rc.local. Tworzymy plik konfiguracyjny.
 NM_CONF="/etc/NetworkManager/conf.d/default-wifi-powersave-on.conf"
 
-# Tworzymy folder (jeśli nie istnieje) i plik konfiguracyjny
 if [ ! -f "$NM_CONF" ]; then
     echo "🔧 Konfiguracja NetworkManager (Power Save OFF)..."
     sudo mkdir -p /etc/NetworkManager/conf.d
-    # Wartość 2 oznacza "DISABLE Power Save"
     echo -e "[connection]\nwifi.powersave = 2" | sudo tee "$NM_CONF" > /dev/null
-    # Restartujemy usługę sieci, żeby załapało od razu (opcjonalne, bo i tak będzie reboot)
     sudo systemctl restart NetworkManager
 fi
 
