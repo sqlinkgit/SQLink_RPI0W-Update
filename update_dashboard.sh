@@ -1,10 +1,10 @@
 #!/bin/bash
 
-GIT_URL="https://github.com/SQLinkgit/SQLink-Update.git"
-GIT_DIR="/root/SQLink-Update"
+GIT_URL="https://github.com/sqlinkgit/SQLink_RPI0W-Update.git"
+GIT_DIR="/root/SQLink_RPI0W-Update"
 WWW_DIR="/var/www/html"
 
-echo "--- UPDATE START ---"
+echo "--- UPDATE START (RPi Zero W) ---"
 date
 
 sleep 5
