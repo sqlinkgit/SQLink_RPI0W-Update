@@ -8,7 +8,7 @@ if ($conf && preg_match('/CALLSIGN=(.*)/', $conf, $m)) {
 }
 
 $nodes = [];
-$nodes[$my_call] = ['status' => 'online', 'tg' => ''];
+$nodes[$my_call] = ['active' => true, 'tg' => ''];
 
 $logFile = '/var/www/html/svx_events.log';
 
@@ -17,13 +17,15 @@ if (file_exists($logFile)) {
     foreach ($lines as $line) {
         $line = trim($line);
 
+        
         if (preg_match('/ReflectorLogic: Node ([A-Z0-9-\/]+) joined/', $line, $matches)) {
             $call = $matches[1];
             if ($call !== $my_call) {
-                $nodes[$call] = ['status' => 'online', 'tg' => ''];
+                $nodes[$call] = ['active' => true, 'tg' => ''];
             }
         }
 
+        
         if (preg_match('/ReflectorLogic: Node ([A-Z0-9-\/]+) left/', $line, $matches)) {
             $call = $matches[1];
             if (isset($nodes[$call])) {
@@ -31,17 +33,30 @@ if (file_exists($logFile)) {
             }
         }
 
+        
+        if (strpos($line, 'Connected nodes:') !== false && preg_match('/Connected nodes: (.*)/', $line, $matches)) {
+            $raw_list = explode(',', $matches[1]);
+            foreach($raw_list as $n) {
+                $n = trim($n);
+                if (!empty($n) && $n !== $my_call) {
+                    $nodes[$n] = ['active' => true, 'tg' => ''];
+                }
+            }
+        }
+
+        
         if (preg_match('/Talker start on TG #(\d+): ([A-Z0-9-\/]+)/', $line, $matches)) {
             $tg = $matches[1];
             $call = $matches[2];
             
             if (!isset($nodes[$call])) {
-                $nodes[$call] = ['status' => 'online', 'tg' => $tg];
+                $nodes[$call] = ['active' => true, 'tg' => $tg];
             } else {
                 $nodes[$call]['tg'] = $tg;
             }
         }
 
+        
         if (preg_match('/ReflectorLogic: Selecting TG #(\d+)/', $line, $matches)) {
             $nodes[$my_call]['tg'] = $matches[1];
         }
