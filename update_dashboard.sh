@@ -54,6 +54,15 @@ fi
 sudo chown -R www-data:www-data $WWW_DIR
 sudo chmod -R 755 $WWW_DIR
 
+RC_LOCAL="/etc/rc.local"
+CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
+
+if [ -f "$CLEANER_SCRIPT" ]; then
+    if ! grep -q "clean_logs_on_boot.sh" "$RC_LOCAL"; then
+        sudo sed -i -e '$i \/usr/local/bin/clean_logs_on_boot.sh &\n' "$RC_LOCAL"
+    fi
+fi
+
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
     sudo cp "$GIT_DIR/update_dashboard.sh" /usr/local/bin/
     sudo chmod +x /usr/local/bin/update_dashboard.sh
