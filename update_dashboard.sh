@@ -72,12 +72,26 @@ if [ ! -f "$NM_CONF" ]; then
     sudo systemctl restart NetworkManager
 fi
 
-if ! grep -q "ping -i 15" "$RC_LOCAL"; then
-    if grep -q "exit 0" "$RC_LOCAL"; then
-        sudo sed -i '/exit 0/i \/bin/ping -i 15 8.8.8.8 > /dev/null 2>&1 &' "$RC_LOCAL"
-    else
-        sudo sed -i '$a \/bin/ping -i 15 8.8.8.8 > /dev/null 2>&1 &' "$RC_LOCAL"
-    fi
+sudo sed -i '/ping -i/d' "$RC_LOCAL"
+
+SERVICE_FILE="/etc/systemd/system/ping-keepalive.service"
+if [ ! -f "$SERVICE_FILE" ]; then
+    echo "[Unit]" | sudo tee "$SERVICE_FILE"
+    echo "Description=Ping Keepalive" | sudo tee -a "$SERVICE_FILE"
+    echo "After=network-online.target" | sudo tee -a "$SERVICE_FILE"
+    echo "Wants=network-online.target" | sudo tee -a "$SERVICE_FILE"
+    echo "" | sudo tee -a "$SERVICE_FILE"
+    echo "[Service]" | sudo tee -a "$SERVICE_FILE"
+    echo "ExecStart=/bin/ping -i 15 8.8.8.8" | sudo tee -a "$SERVICE_FILE"
+    echo "Restart=always" | sudo tee -a "$SERVICE_FILE"
+    echo "RestartSec=10" | sudo tee -a "$SERVICE_FILE"
+    echo "" | sudo tee -a "$SERVICE_FILE"
+    echo "[Install]" | sudo tee -a "$SERVICE_FILE"
+    echo "WantedBy=multi-user.target" | sudo tee -a "$SERVICE_FILE"
+    
+    sudo systemctl daemon-reload
+    sudo systemctl enable ping-keepalive
+    sudo systemctl start ping-keepalive
 fi
 
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
