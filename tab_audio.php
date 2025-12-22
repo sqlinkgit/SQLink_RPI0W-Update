@@ -72,10 +72,3 @@
     </div>
     <button type="submit" name="save_audio" class="btn btn-green">Zapisz Ustawienia Audio</button>
 </form>
-
-<hr style="border:0; border-top:1px solid #444; margin:30px 0;">
-
-<form method="post">
-    <input type="hidden" name="active_tab" class="active-tab-input" value="Audio">
-    <button type="submit" name="reset_audio_defaults" class="btn btn-red" onclick="return confirm('To zresetuje suwaki do bezpiecznych wartości. Kontynuować?')">⚠️ Reset Audio</button>
-</form>

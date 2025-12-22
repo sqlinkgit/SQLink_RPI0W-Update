@@ -59,17 +59,6 @@
         $audio_msg = '<div class="alert alert-success">✅ Audio ZAPISANE.</div>';
     }
 
-    // [NOWE] Reset Audio do bezpiecznych wartości
-    if (isset($_POST['reset_audio_defaults'])) {
-        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=7 1");  // Mic On
-        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=8 25"); // Mic Vol ~70%
-        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=9 0");  // AGC Off
-        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=5 1");  // Spk On
-        shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=6 30"); // Spk Vol ~80%
-        shell_exec("sudo /usr/sbin/alsactl store $CARD_ID");
-        $audio_msg = '<div class="alert alert-warning">♻️ Przywrócono domyślne ustawienia Audio.</div>';
-    }
-
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
     // --- 4. PARSOWANIE CONFIGU SVXLINK ---
