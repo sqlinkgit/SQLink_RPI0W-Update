@@ -9,6 +9,7 @@ date
 
 sleep 5
 
+# 1. Pobierz repozytorium
 if [ ! -d "$GIT_DIR" ]; then
     cd /root
     git clone $GIT_URL
@@ -20,13 +21,13 @@ else
     git pull origin main
 fi
 
-
+# 2. Instaluj Python tools
 if compgen -G "$GIT_DIR/*.py" > /dev/null; then
     sudo cp $GIT_DIR/*.py /usr/local/bin/
     sudo chmod +x /usr/local/bin/*.py
 fi
 
-
+# 3. Instaluj skrypty SH
 for script in $GIT_DIR/*.sh; do
     filename=$(basename "$script")
     if [ "$filename" != "update_dashboard.sh" ]; then
@@ -35,7 +36,7 @@ for script in $GIT_DIR/*.sh; do
     fi
 done
 
-
+# 4. WWW i Configi
 sudo cp $GIT_DIR/*.css $WWW_DIR/ 2>/dev/null
 sudo cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
 sudo cp $GIT_DIR/*.png $WWW_DIR/ 2>/dev/null
@@ -47,7 +48,7 @@ if [ ! -f "$WWW_DIR/radio_config.json" ]; then
     fi
 fi
 
-
+# 5. Dźwięki
 if [ -d "$GIT_DIR/sounds" ]; then
     sudo mkdir -p /usr/local/share/svxlink/sounds/pl_PL/
     sudo cp -r $GIT_DIR/sounds/* /usr/local/share/svxlink/sounds/pl_PL/
@@ -55,29 +56,31 @@ if [ -d "$GIT_DIR/sounds" ]; then
     sudo chmod -R 755 /usr/local/share/svxlink/sounds/pl_PL/
 fi
 
-
+# 6. Uprawnienia WWW
 sudo chown -R www-data:www-data $WWW_DIR
 sudo chmod -R 755 $WWW_DIR
 
-
+# --- 7. AUTOSTART: Fix Logów + Event Logger ---
 RC_LOCAL="/etc/rc.local"
 CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
 
 if [ -f "$CLEANER_SCRIPT" ]; then
     if ! grep -q "clean_logs_on_boot.sh" "$RC_LOCAL"; then
         echo "🔧 Dodaję logger do rc.local..."
-
+        # UWAGA: Tu są apostrofy, muszą być domknięte!
         sudo sed -i -e '$i \/usr/local/bin/clean_logs_on_boot.sh &\n' "$RC_LOCAL"
     fi
 fi
 
-
+# --- 8. FIX WIFI POWER SAVE (NOWOŚĆ) ---
+# Sprawdza czy wpis już jest, jeśli nie - dodaje komendę wyłączającą usypianie WiFi
 if ! grep -q "iw wlan0 set power_save off" "$RC_LOCAL"; then
     echo "🔧 Wyłączanie WiFi Power Save..."
+    # UWAGA: Tu też są apostrofy!
     sudo sed -i -e '$i \/sbin/iw wlan0 set power_save off\n' "$RC_LOCAL"
 fi
 
-
+# 9. Aktualizacja samego siebie
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
     sudo cp "$GIT_DIR/update_dashboard.sh" /usr/local/bin/
     sudo chmod +x /usr/local/bin/update_dashboard.sh
