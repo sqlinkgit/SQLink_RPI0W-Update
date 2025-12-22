@@ -67,17 +67,22 @@ CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
 if [ -f "$CLEANER_SCRIPT" ]; then
     if ! grep -q "clean_logs_on_boot.sh" "$RC_LOCAL"; then
         echo "🔧 Dodaję logger do rc.local..."
-        # UWAGA: Tu są apostrofy, muszą być domknięte!
         sudo sed -i -e '$i \/usr/local/bin/clean_logs_on_boot.sh &\n' "$RC_LOCAL"
     fi
 fi
 
-# --- 8. FIX WIFI POWER SAVE (NOWOŚĆ) ---
-# Sprawdza czy wpis już jest, jeśli nie - dodaje komendę wyłączającą usypianie WiFi
-if ! grep -q "iw wlan0 set power_save off" "$RC_LOCAL"; then
-    echo "🔧 Wyłączanie WiFi Power Save..."
-    # UWAGA: Tu też są apostrofy!
-    sudo sed -i -e '$i \/sbin/iw wlan0 set power_save off\n' "$RC_LOCAL"
+# --- 8. FIX WIFI POWER SAVE (METODA NETWORK MANAGER) ---
+# To jest pewniejsza metoda niż rc.local. Tworzymy plik konfiguracyjny.
+NM_CONF="/etc/NetworkManager/conf.d/default-wifi-powersave-on.conf"
+
+# Tworzymy folder (jeśli nie istnieje) i plik konfiguracyjny
+if [ ! -f "$NM_CONF" ]; then
+    echo "🔧 Konfiguracja NetworkManager (Power Save OFF)..."
+    sudo mkdir -p /etc/NetworkManager/conf.d
+    # Wartość 2 oznacza "DISABLE Power Save"
+    echo -e "[connection]\nwifi.powersave = 2" | sudo tee "$NM_CONF" > /dev/null
+    # Restartujemy usługę sieci, żeby załapało od razu (opcjonalne, bo i tak będzie reboot)
+    sudo systemctl restart NetworkManager
 fi
 
 # 9. Aktualizacja samego siebie
