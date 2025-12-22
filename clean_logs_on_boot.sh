@@ -27,7 +27,10 @@ chmod 644 "$EVENT_FILE"
 
 ls -1t "$ARCHIVE_DIR"/svxlink_*.log 2>/dev/null | tail -n +$((MAX_ARCHIVES + 1)) | xargs -r rm --
 
-systemctl start svxlink
 
-pkill -f "tail -F -n 0 /var/log/svxlink"
+pkill -f "tail -F"
 /usr/local/bin/svx_event_logger.sh &
+
+sleep 2
+
+systemctl start svxlink
