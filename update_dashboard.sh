@@ -59,8 +59,15 @@ CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
 
 if [ -f "$CLEANER_SCRIPT" ]; then
     if ! grep -q "clean_logs_on_boot.sh" "$RC_LOCAL"; then
+        echo "🔧 Dodaję logger do rc.local..."
         sudo sed -i -e '$i \/usr/local/bin/clean_logs_on_boot.sh &\n' "$RC_LOCAL"
     fi
+fi
+
+
+if ! grep -q "iw wlan0 set power_save off" "$RC_LOCAL"; then
+    echo "🔧 Wyłączanie WiFi Power Save (Fix Disconnect)..."
+    sudo sed -i -e '$i \/sbin/iw wlan0 set power_save off\n' "$RC_LOCAL"
 fi
 
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
