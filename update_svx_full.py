@@ -70,6 +70,7 @@ def main():
 
     lines = load_lines(CONFIG_FILE)
 
+    # LOGIKA ECHOLINK (BEZ HASŁA = OFF)
     modules_str = data.get('Modules', 'Help,Parrot,EchoLink')
     el_pass = data.get('EL_Password', '')
     
@@ -90,7 +91,8 @@ def main():
             "TMP_MONITOR_TIMEOUT": data.get('TmpTimeout'),
             "TGSTBEEP_ENABLE": data.get('Beep3Tone'),
             "TGREANON_ENABLE": data.get('AnnounceTG'),
-            "REFCON_ENABLE": data.get('RefStatusInfo')
+            "REFCON_ENABLE": data.get('RefStatusInfo'),
+            "UDP_HEARTBEAT_INTERVAL": "10" 
         },
         "SimplexLogic": {
             "CALLSIGN": data.get('Callsign'),
