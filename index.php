@@ -61,7 +61,6 @@
 
     // [NOWE] Reset Audio do bezpiecznych wartości
     if (isset($_POST['reset_audio_defaults'])) {
-        // Ustawienia bezpieczne dla CM108
         shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=7 1");  // Mic On
         shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=8 25"); // Mic Vol ~70%
         shell_exec("sudo /usr/bin/amixer -c $CARD_ID cset numid=9 0");  // AGC Off
@@ -167,19 +166,24 @@
         echo "<div class='alert alert-warning'>Usuwanie sieci: $ssid</div><meta http-equiv='refresh' content='2'>";
     }
 
-    // Pobieranie listy zapamiętanych sieci przez NMCLI (z ukrywaniem Rescue_AP)
+    // Pobieranie listy zapamiętanych sieci przez NMCLI (FILTR UKRYWANIA)
     $saved_wifi_list = [];
     $nm_saved = shell_exec("sudo /usr/bin/nmcli -t -f NAME connection show 2>/dev/null");
+    
+    // LISTA SIECI DO UKRYCIA
+    $ignored_list = [
+        "Wired connection 1",
+        "lo",
+        "Rescue_AP",
+        "SQLink_WiFi_AP",
+        "preconfigured"
+    ];
+
     if ($nm_saved) {
         $lines = explode("\n", trim($nm_saved));
         foreach($lines as $l) {
             $l = trim($l);
-            // FILTR: Ukrywamy "Wired", "lo" oraz sieci ratunkowe
-            if(!empty($l) 
-               && $l != "Wired connection 1" 
-               && $l != "lo" 
-               && $l != "Rescue_AP" 
-               && $l != "SQLink_WiFi_AP") {
+            if(!empty($l) && !in_array($l, $ignored_list)) {
                 $saved_wifi_list[] = $l;
             }
         }
