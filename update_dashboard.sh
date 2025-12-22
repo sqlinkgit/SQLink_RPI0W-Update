@@ -20,10 +20,12 @@ else
     git pull origin main
 fi
 
+
 if compgen -G "$GIT_DIR/*.py" > /dev/null; then
     sudo cp $GIT_DIR/*.py /usr/local/bin/
     sudo chmod +x /usr/local/bin/*.py
 fi
+
 
 for script in $GIT_DIR/*.sh; do
     filename=$(basename "$script")
@@ -32,6 +34,7 @@ for script in $GIT_DIR/*.sh; do
         sudo chmod +x "/usr/local/bin/$filename"
     fi
 done
+
 
 sudo cp $GIT_DIR/*.css $WWW_DIR/ 2>/dev/null
 sudo cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
@@ -44,6 +47,7 @@ if [ ! -f "$WWW_DIR/radio_config.json" ]; then
     fi
 fi
 
+
 if [ -d "$GIT_DIR/sounds" ]; then
     sudo mkdir -p /usr/local/share/svxlink/sounds/pl_PL/
     sudo cp -r $GIT_DIR/sounds/* /usr/local/share/svxlink/sounds/pl_PL/
@@ -51,8 +55,10 @@ if [ -d "$GIT_DIR/sounds" ]; then
     sudo chmod -R 755 /usr/local/share/svxlink/sounds/pl_PL/
 fi
 
+
 sudo chown -R www-data:www-data $WWW_DIR
 sudo chmod -R 755 $WWW_DIR
+
 
 RC_LOCAL="/etc/rc.local"
 CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
@@ -60,15 +66,17 @@ CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
 if [ -f "$CLEANER_SCRIPT" ]; then
     if ! grep -q "clean_logs_on_boot.sh" "$RC_LOCAL"; then
         echo "🔧 Dodaję logger do rc.local..."
+
         sudo sed -i -e '$i \/usr/local/bin/clean_logs_on_boot.sh &\n' "$RC_LOCAL"
     fi
 fi
 
 
 if ! grep -q "iw wlan0 set power_save off" "$RC_LOCAL"; then
-    echo "🔧 Wyłączanie WiFi Power Save (Fix Disconnect)..."
+    echo "🔧 Wyłączanie WiFi Power Save..."
     sudo sed -i -e '$i \/sbin/iw wlan0 set power_save off\n' "$RC_LOCAL"
 fi
+
 
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
     sudo cp "$GIT_DIR/update_dashboard.sh" /usr/local/bin/
