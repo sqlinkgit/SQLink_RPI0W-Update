@@ -30,12 +30,8 @@ def update_key_in_lines(lines, section, key, value):
 
     for line in lines:
         stripped = line.strip()
-        
         if stripped.startswith("[") and stripped.endswith("]"):
-            if stripped == section_header:
-                in_section = True
-            else:
-                in_section = False
+            in_section = (stripped == section_header)
         
         if in_section and stripped.startswith(f"{key}="):
             new_lines.append(f"{key}={value}\n")
@@ -74,6 +70,14 @@ def main():
 
     lines = load_lines(CONFIG_FILE)
 
+    modules_str = data.get('Modules', 'Help,Parrot,EchoLink')
+    el_pass = data.get('EL_Password', '')
+    
+    if not el_pass:
+        modules_list = [m.strip() for m in modules_str.split(',')]
+        modules_list = [m for m in modules_list if 'EchoLink' not in m]
+        modules_str = ",".join(modules_list)
+
     mapping = {
         "ReflectorLogic": {
             "CALLSIGN": data.get('Callsign'),
@@ -91,11 +95,11 @@ def main():
         "SimplexLogic": {
             "CALLSIGN": data.get('Callsign'),
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
-            "MODULES": data.get('Modules')
+            "MODULES": modules_str
         },
         "ModuleEchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),
-            "PASSWORD": data.get('EL_Password'),
+            "PASSWORD": el_pass,
             "SYSOPNAME": data.get('EL_Sysop'),
             "LOCATION": data.get('EL_Location'),
             "DESCRIPTION": data.get('EL_Desc'),
