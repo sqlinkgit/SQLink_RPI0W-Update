@@ -5,7 +5,7 @@ GIT_DIR="/root/SQLink_RPI0W-Update"
 WWW_DIR="/var/www/html"
 
 date
-sleep 5
+sleep 3
 
 if [ ! -d "$GIT_DIR" ]; then
     cd /root
@@ -36,10 +36,8 @@ sudo cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
 sudo cp $GIT_DIR/*.png $WWW_DIR/ 2>/dev/null
 sudo cp $GIT_DIR/*.php $WWW_DIR/
 
-if [ ! -f "$WWW_DIR/radio_config.json" ]; then
-    if [ -f "$GIT_DIR/radio_config.json" ]; then
-        sudo cp $GIT_DIR/radio_config.json $WWW_DIR/
-    fi
+if [ ! -f "$WWW_DIR/radio_config.json" ] && [ -f "$GIT_DIR/radio_config.json" ]; then
+    sudo cp $GIT_DIR/radio_config.json $WWW_DIR/
 fi
 
 if [ -d "$GIT_DIR/sounds" ]; then
@@ -53,48 +51,65 @@ sudo chown -R www-data:www-data $WWW_DIR
 sudo chmod -R 755 $WWW_DIR
 
 RC_LOCAL="/etc/rc.local"
-CLEANER_SCRIPT="/usr/local/bin/clean_logs_on_boot.sh"
-
-if [ -f "$CLEANER_SCRIPT" ]; then
-    if ! grep -q "clean_logs_on_boot.sh" "$RC_LOCAL"; then
-        if grep -q "exit 0" "$RC_LOCAL"; then
-            sudo sed -i '/exit 0/i \/usr/local/bin/clean_logs_on_boot.sh &' "$RC_LOCAL"
-        else
-            sudo sed -i '$a \/usr/local/bin/clean_logs_on_boot.sh &' "$RC_LOCAL"
-        fi
-    fi
+if [ -f "$RC_LOCAL" ]; then
+    sudo sed -i '/simple_logger.sh/d' "$RC_LOCAL"
+    sudo sed -i '/tail -F/d' "$RC_LOCAL"
 fi
 
-NM_CONF="/etc/NetworkManager/conf.d/default-wifi-powersave-on.conf"
-if [ ! -f "$NM_CONF" ]; then
-    sudo mkdir -p /etc/NetworkManager/conf.d
-    echo -e "[connection]\nwifi.powersave = 2" | sudo tee "$NM_CONF" > /dev/null
-    sudo systemctl restart NetworkManager
+sudo pkill -f "tail -F /var/log/svxlink"
+sudo truncate -s 0 /var/www/html/svx_events.log
+sudo chmod 666 /var/www/html/svx_events.log
+
+LOGGER_SERVICE="/etc/systemd/system/svxlink-logger.service"
+if [ ! -f "$LOGGER_SERVICE" ]; then
+    cat <<EOF > "$LOGGER_SERVICE"
+[Unit]
+Description=SvxLink Web Dashboard Logger
+After=network.target svxlink.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/usr/bin/tail -n 0 -F /var/log/svxlink >> /var/www/html/svx_events.log'
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    sudo systemctl daemon-reload
+    sudo systemctl enable svxlink-logger
 fi
 
-sudo sed -i '/ping -i/d' "$RC_LOCAL"
+sudo systemctl restart svxlink-logger
 
 SERVICE_FILE="/etc/systemd/system/ping-keepalive.service"
+PING_PATH=$(which ping)
+if [ -z "$PING_PATH" ]; then PING_PATH="/bin/ping"; fi
+
 if [ ! -f "$SERVICE_FILE" ]; then
-    echo "[Unit]" | sudo tee "$SERVICE_FILE"
-    echo "Description=Ping Keepalive" | sudo tee -a "$SERVICE_FILE"
-    echo "After=network-online.target" | sudo tee -a "$SERVICE_FILE"
-    echo "Wants=network-online.target" | sudo tee -a "$SERVICE_FILE"
-    echo "" | sudo tee -a "$SERVICE_FILE"
-    echo "[Service]" | sudo tee -a "$SERVICE_FILE"
-    echo "ExecStart=/bin/ping -i 15 8.8.8.8" | sudo tee -a "$SERVICE_FILE"
-    echo "Restart=always" | sudo tee -a "$SERVICE_FILE"
-    echo "RestartSec=10" | sudo tee -a "$SERVICE_FILE"
-    echo "" | sudo tee -a "$SERVICE_FILE"
-    echo "[Install]" | sudo tee -a "$SERVICE_FILE"
-    echo "WantedBy=multi-user.target" | sudo tee -a "$SERVICE_FILE"
-    
+    cat <<EOF > "$SERVICE_FILE"
+[Unit]
+Description=Ping Keepalive
+After=network.target
+
+[Service]
+ExecStart=$PING_PATH -i 15 8.8.8.8
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
     sudo systemctl daemon-reload
     sudo systemctl enable ping-keepalive
-    sudo systemctl start ping-keepalive
 fi
+
+sudo systemctl restart ping-keepalive
 
 if ! cmp -s "$GIT_DIR/update_dashboard.sh" "/usr/local/bin/update_dashboard.sh"; then
     sudo cp "$GIT_DIR/update_dashboard.sh" /usr/local/bin/
     sudo chmod +x /usr/local/bin/update_dashboard.sh
 fi
+
+echo "--- END UPDATE ---"
