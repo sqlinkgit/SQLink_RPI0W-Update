@@ -7,16 +7,17 @@ WWW_DIR="/var/www/html"
 echo "--- START UPDATE ---"
 date
 
+
 if [ ! -d "$GIT_DIR" ]; then
     cd /root
     git clone $GIT_URL
-    if [ $? -ne 0 ]; then echo "STATUS: FAILURE"; exit 1; fi
+    PULL_OUT="Cloned" 
 else
     cd $GIT_DIR
     git config core.fileMode false
     git fetch --all
     git reset --hard origin/main
-    PULL_OUT=$(git pull origin main 2>&1)
+    PULL_OUT=$(git pull origin main 2>&1) 
     echo "$PULL_OUT"
     
     if [ $? -ne 0 ]; then 
@@ -24,6 +25,7 @@ else
         exit 1; 
     fi
 fi
+
 
 SCRIPT_PATH="/usr/local/bin/update_dashboard.sh"
 REPO_SCRIPT="$GIT_DIR/update_dashboard.sh"
@@ -36,7 +38,8 @@ if [ -f "$SCRIPT_PATH" ] && [ -f "$REPO_SCRIPT" ]; then
     fi
 fi
 
-echo "Wymuszam kopiowanie plikow na WWW..."
+
+echo "Synchronizacja plikow WWW..."
 cp $GIT_DIR/*.css $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.png $WWW_DIR/ 2>/dev/null
@@ -62,6 +65,7 @@ done
 chown -R www-data:www-data $WWW_DIR
 chmod -R 755 $WWW_DIR
 
+
 cat <<EOF > /usr/local/bin/clean_logs_on_boot.sh
 #!/bin/bash
 if [ -f /var/log/svxlink ]; then
@@ -81,5 +85,13 @@ exit 0
 EOF
 chmod +x /etc/rc.local
 
-echo "STATUS: SUCCESS"
+
+if [[ "$PULL_OUT" == *"Already up to date"* ]]; then
+    
+    echo "STATUS: UP_TO_DATE"
+else
+    
+    echo "STATUS: SUCCESS"
+fi
+
 exit 0
