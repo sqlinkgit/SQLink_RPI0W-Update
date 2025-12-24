@@ -1,5 +1,4 @@
 <style>
-    
     #loading-overlay {
         display: none;
         position: fixed;
@@ -16,10 +15,9 @@
         backdrop-filter: blur(5px);
     }
 
-    
     .spinner {
         border: 8px solid #333;
-        border-top: 8px solid #4CAF50; 
+        border-top: 8px solid #4CAF50;
         border-radius: 50%;
         width: 60px;
         height: 60px;
@@ -27,13 +25,11 @@
         margin-bottom: 20px;
     }
 
-    
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
 
-    
     .loading-text {
         color: #fff;
         font-size: 24px;
@@ -75,12 +71,6 @@
 
 <script>
     function showLoader() {
-        
         document.getElementById('loading-overlay').style.display = 'flex';
-        
-        
-        setTimeout(function() {
-            
-        }, 100);
     }
 </script>
