@@ -236,6 +236,9 @@ function showTooltip(e, callsign) {
     
     $("#nt-ver").text(info.projVer || "---");
 
+    // PODMIANA LINKU DLA QRZ
+    $("#nt-qrz-btn").attr("href", "https://www.qrz.com/db/" + callsign);
+
     tooltip.style.display = 'block';
     moveTooltip(e);
 }

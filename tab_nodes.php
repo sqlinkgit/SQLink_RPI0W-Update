@@ -20,6 +20,10 @@
             <span class="nt-label">Wersja:</span>
             <span class="nt-val" id="nt-ver">---</span>
         </div>
+        
+        <a id="nt-qrz-btn" href="#" target="_blank" class="qrz-logo-container" title="Zobacz na QRZ.com">
+            <img src="qrz.png" alt="QRZ.com" class="qrz-img">
+        </a>
     </div>
 </div>
 
