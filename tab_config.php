@@ -17,9 +17,17 @@
         </div>
         
         <div class="panel-box">
+            <h4 class="panel-title green">Lokalizacja i Operator</h4>
+            <div class="form-group"><label>Imię Operatora</label><input type="text" name="qth_name" value="<?php echo isset($radio['qth_name']) ? $radio['qth_name'] : ''; ?>"></div>
+            <div class="form-group"><label>Miasto (QTH)</label><input type="text" name="qth_city" value="<?php echo isset($radio['qth_city']) ? $radio['qth_city'] : ''; ?>"></div>
+            <div class="form-group"><label>QTH Locator</label><input type="text" name="qth_loc" value="<?php echo isset($radio['qth_loc']) ? $radio['qth_loc'] : ''; ?>" placeholder="np. JO91SV"></div>
+            <small style="color:#888; font-size:10px;">Dane te będą widoczne w dymkach na mapie węzłów.</small>
+        </div>
+
+        <div class="panel-box">
             <h4 class="panel-title blue">EchoLink</h4>
             <div class="form-group"><label>Znak EchoLink</label><input type="text" name="EL_Callsign" value="<?php echo $vals_el['Callsign']; ?>"></div>
-            <div class="form-group"><label>Hasło EchoLink</label><input type="password" name="EL_Password" value="<?php echo $vals_el['Password']; ?>"></div>
+            <div class="form-group"><label>Hasło EchoLink</label><input type="password" name="EL_Password" id="el-pass" value="<?php echo $vals_el['Password']; ?>"></div>
             <div class="form-group"><label>Nazwa Sysop (Widoczna)</label><input type="text" name="EL_Sysop" value="<?php echo $vals_el['Sysop']; ?>"></div>
             <div class="form-group"><label>Opis Stacji</label><input type="text" name="EL_Desc" value="<?php echo $vals_el['Desc']; ?>"></div>
             <div class="form-group"><label>Proxy (IP)</label><input type="text" name="EL_ProxyHost" value="<?php echo $vals_el['Proxy']; ?>" placeholder="np. 44.31.61.106"><small style="color:#888; font-size:10px;">Zostaw puste aby wyłączyć proxy.</small></div>
@@ -33,9 +41,16 @@
             <h4 class="panel-title green">Zaawansowane / Audio</h4>
             
             <div class="form-group" style="margin-bottom: 20px;">
-                <label>Aktywne Moduły (Ładowane przy starcie)</label>
-                <input type="text" name="Modules" value="<?php echo $vals['Modules']; ?>" style="border-color: #4CAF50;">
-                <small style="color:#888; font-size:10px;">Wpisz nazwy modułów oddzielone przecinkami (np. Help,Parrot,EchoLink)</small>
+                <label>Aktywne Moduły (Wybierz klikając)</label>
+                <input type="hidden" name="Modules" id="input-modules" value="<?php echo $vals['Modules']; ?>">
+                
+                <div class="mod-grid">
+                    <div class="mod-btn" id="btn-ModuleHelp" onclick="toggleModule('ModuleHelp')">Pomoc (Help)</div>
+                    <div class="mod-btn" id="btn-ModuleParrot" onclick="toggleModule('ModuleParrot')">Papuga (Parrot)</div>
+                    <div class="mod-btn" id="btn-ModuleEchoLink" onclick="toggleModule('ModuleEchoLink')">EchoLink</div>
+                    <div class="mod-btn" id="btn-ModuleMetarInfo" onclick="toggleModule('ModuleMetarInfo')">MetarInfo</div>
+                </div>
+                <small style="color:#888; font-size:10px;">Kliknij, aby włączyć/wyłączyć moduł. Zielony = Aktywny.</small>
             </div>
 
             <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">

@@ -215,3 +215,33 @@ input[type="text"], input[type="password"], select { width: 100%; padding: 10px;
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .loading-text { color: #fff; font-size: 24px; font-weight: bold; letter-spacing: 1px; }
 .loading-subtext { color: #ccc; font-size: 14px; margin-top: 10px; }
+
+/* STYLE DLA PRZYCISKÓW MODUŁÓW */
+.mod-btn {
+    background: #444; 
+    color: #aaa; 
+    border: 1px solid #555;
+    padding: 12px; 
+    border-radius: 4px; 
+    cursor: pointer;
+    text-align: center; 
+    font-weight: bold; 
+    font-size: 12px;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+.mod-btn.active {
+    background: #4CAF50; 
+    color: #fff; 
+    border-color: #388E3C;
+    opacity: 1; 
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+}
+
+.mod-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
+    gap: 10px; 
+    margin-top: 5px; 
+}

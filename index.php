@@ -88,7 +88,17 @@
     ];
 
     $jsonFile = '/var/www/html/radio_config.json';
-    $radio = ["rx" => "432.8500", "tx" => "432.8500", "ctcss" => "0000", "sq" => "2", "desc" => "Brak opisu"];
+    // Domyślne wartości z nowymi polami QTH/Operator
+    $radio = [
+        "rx" => "432.8500", 
+        "tx" => "432.8500", 
+        "ctcss" => "0000", 
+        "sq" => "2", 
+        "desc" => "Brak opisu",
+        "qth_name" => "",
+        "qth_city" => "",
+        "qth_loc" => ""
+    ];
     if (file_exists($jsonFile)) { $loaded = json_decode(file_get_contents($jsonFile), true); if ($loaded) $radio = array_merge($radio, $loaded); }
 
     // --- 5. AKCJE SYSTEMOWE I CONFIG ---
