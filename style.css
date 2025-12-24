@@ -55,14 +55,14 @@ h1 { margin: 0; color: #fff; font-size: 24px; letter-spacing: 1px; }
 #nt-callsign { font-weight: bold; color: #4CAF50; font-size: 14px; }
 #nt-sw { color: #666; font-size: 10px; }
 
-.nt-body { padding: 10px; padding-bottom: 32px; /* Miejsce na logo QRZ */ }
+.nt-body { padding: 10px; padding-bottom: 32px; }
 .nt-row { margin-bottom: 6px; display: flex; flex-direction: column; }
 .nt-row:last-child { margin-bottom: 0; }
 .nt-label { color: #888; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
 .nt-val { color: #ddd; font-weight: 500; word-break: break-word; }
 .nt-val.hl { color: #FF9800; font-weight: bold; }
 
-/* QRZ LOGO */
+/* QRZ LOGO - Tylko wizualnie, bez klikania */
 .qrz-logo-container {
     position: absolute;
     bottom: 8px;
@@ -82,12 +82,7 @@ h1 { margin: 0; color: #fff; font-size: 24px; letter-spacing: 1px; }
 }
 
 .qrz-logo-container:hover {
-    transform: scale(1.2) rotate(-2deg);
-    cursor: pointer;
-}
-
-.qrz-logo-container:hover .qrz-img {
-    filter: drop-shadow(0 5px 8px rgba(0,0,0,0.7));
+    transform: scale(1.1); /* Lekkie powiększenie dla efektu */
 }
 
 .dtmf-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }

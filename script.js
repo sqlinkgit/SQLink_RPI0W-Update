@@ -199,7 +199,8 @@ function updateNodes() {
                 var isMe = (call === myCall);
                 var cssClass = isMe ? "node-item is-me" : "node-item";
                 
-                html += `<div class="${cssClass}" onmouseenter="showTooltip(event, '${call}')" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
+                // ZMIANA: Dodano onclick otwierajacy QRZ w nowej karcie
+                html += `<div class="${cssClass}" onclick="window.open('https://www.qrz.com/db/${call}', '_blank')" onmouseenter="showTooltip(event, '${call}')" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
                             <span class="node-icon">📻</span>
                             <span class="node-name">${call}</span>
                          </div>`;
@@ -235,9 +236,6 @@ function showTooltip(e, callsign) {
     $("#nt-loc").text(location);
     
     $("#nt-ver").text(info.projVer || "---");
-
-    // PODMIANA LINKU DLA QRZ
-    $("#nt-qrz-btn").attr("href", "https://www.qrz.com/db/" + callsign);
 
     tooltip.style.display = 'block';
     moveTooltip(e);
