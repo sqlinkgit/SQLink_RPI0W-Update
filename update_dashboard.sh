@@ -23,11 +23,6 @@ else
         echo "STATUS: FAILURE"; 
         exit 1; 
     fi
-
-    if [[ "$PULL_OUT" == *"Already up to date"* ]]; then
-        echo "STATUS: UP_TO_DATE"
-        exit 0
-    fi
 fi
 
 SCRIPT_PATH="/usr/local/bin/update_dashboard.sh"
@@ -41,7 +36,7 @@ if [ -f "$SCRIPT_PATH" ] && [ -f "$REPO_SCRIPT" ]; then
     fi
 fi
 
-echo "Kopiowanie plikow..."
+echo "Wymuszam kopiowanie plikow na WWW..."
 cp $GIT_DIR/*.css $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.png $WWW_DIR/ 2>/dev/null
@@ -81,12 +76,7 @@ chmod +x /usr/local/bin/clean_logs_on_boot.sh
 
 cat <<EOF > /etc/rc.local
 #!/bin/sh -e
-#
-# rc.local
-# This script is executed at the end of each multiuser runlevel.
-
 /usr/local/bin/clean_logs_on_boot.sh &
-
 exit 0
 EOF
 chmod +x /etc/rc.local
