@@ -75,10 +75,24 @@ def main():
     modules_str = data.get('Modules', 'Help,Parrot,EchoLink')
     el_pass = data.get('EL_Password', '')
     
-    if not el_pass:
-        modules_list = [m.strip() for m in modules_str.split(',')]
-        modules_list = [m for m in modules_list if 'EchoLink' not in m]
-        modules_str = ",".join(modules_list)
+    modules_list = [m.strip() for m in modules_str.split(',')]
+    clean_modules = []
+    
+    for m in modules_list:
+        if m.startswith("Module") and len(m) > 6:
+            clean_name = m[6:]
+        else:
+            clean_name = m
+            
+        if clean_name == "EchoLink" and not el_pass:
+            continue
+            
+        if clean_name == "MetarInfo":
+            continue
+            
+        clean_modules.append(clean_name)
+        
+    modules_str = ",".join(clean_modules)
 
     qth_name = data.get('qth_name', '')
     qth_city = data.get('qth_city', '')

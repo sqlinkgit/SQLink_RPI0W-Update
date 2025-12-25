@@ -78,14 +78,15 @@ function toggleModule(modName) {
     var isActive = btn.classList.contains('active');
     var currentList = input.value.split(',').map(s => s.trim()).filter(s => s !== "");
     
+    var shortName = modName.replace('Module', '');
+
     if (isActive) {
         btn.classList.remove('active');
-        var shortName = modName.replace('Module', '');
         currentList = currentList.filter(s => s !== modName && s !== shortName);
     } else {
         btn.classList.add('active');
-        if (!currentList.includes(modName)) {
-            currentList.push(modName);
+        if (!currentList.includes(shortName)) {
+            currentList.push(shortName);
         }
     }
     
@@ -276,8 +277,6 @@ function showTooltip(e, callsign) {
     $("#nt-callsign").text(callsign);
     $("#nt-sw").text((info.sw || "") + " " + (info.swVer || ""));
     
-
-    
     var name = "---";
     if (info.Sysop) {
          name = info.Sysop;
@@ -288,11 +287,9 @@ function showTooltip(e, callsign) {
     }
     $("#nt-name").text(name);
 
-
     var activeTg = (info.tg && info.tg !== 0) ? info.tg : "Brak (Czuwanie)";
     $("#nt-tg").text(activeTg);
     
-
     var locator = "---";
     if (info.Locator) {
         locator = info.Locator;
@@ -300,7 +297,6 @@ function showTooltip(e, callsign) {
         locator = info.qth[0].pos.loc;
     }
     $("#nt-qth").text(locator);
-
 
     var location = "---";
     if (info.Location) {
@@ -310,7 +306,6 @@ function showTooltip(e, callsign) {
     }
     $("#nt-loc").text(location);
     
-
     var monitored = "---";
     if (info.monitoredTGs && Array.isArray(info.monitoredTGs) && info.monitoredTGs.length > 0) {
         monitored = info.monitoredTGs.join(", ");
