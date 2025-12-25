@@ -276,6 +276,8 @@ function showTooltip(e, callsign) {
     $("#nt-callsign").text(callsign);
     $("#nt-sw").text((info.sw || "") + " " + (info.swVer || ""));
     
+
+    
     var name = "---";
     if (info.Sysop) {
          name = info.Sysop;
@@ -286,9 +288,11 @@ function showTooltip(e, callsign) {
     }
     $("#nt-name").text(name);
 
+
     var activeTg = (info.tg && info.tg !== 0) ? info.tg : "Brak (Czuwanie)";
     $("#nt-tg").text(activeTg);
     
+
     var locator = "---";
     if (info.Locator) {
         locator = info.Locator;
@@ -296,6 +300,7 @@ function showTooltip(e, callsign) {
         locator = info.qth[0].pos.loc;
     }
     $("#nt-qth").text(locator);
+
 
     var location = "---";
     if (info.Location) {
@@ -305,6 +310,7 @@ function showTooltip(e, callsign) {
     }
     $("#nt-loc").text(location);
     
+
     var monitored = "---";
     if (info.monitoredTGs && Array.isArray(info.monitoredTGs) && info.monitoredTGs.length > 0) {
         monitored = info.monitoredTGs.join(", ");

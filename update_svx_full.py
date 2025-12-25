@@ -84,7 +84,6 @@ def main():
     qth_city = data.get('qth_city', '')
     qth_loc = data.get('qth_loc', '')
 
-    
     rx_freq = ""
     tx_freq = ""
     ctcss = "0"
@@ -123,9 +122,6 @@ def main():
     except Exception as e:
         print(f"Error writing node_info.json: {e}")
 
-    
-
-    
     loc_parts = []
     if qth_city: loc_parts.append(qth_city)
     if qth_loc: loc_parts.append(qth_loc)
@@ -176,7 +172,6 @@ def main():
 
     save_lines(CONFIG_FILE, lines)
 
-    
     radio_data = {}
     if os.path.exists(RADIO_JSON):
         with open(RADIO_JSON, 'r') as f:
