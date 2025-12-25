@@ -79,7 +79,6 @@ def main():
     clean_modules = []
     
     for m in modules_list:
-
         clean_name = m
             
         if clean_name == "ModuleEchoLink" and not el_pass:
@@ -88,6 +87,10 @@ def main():
         if clean_name == "MetarInfo":
             continue
             
+        if clean_name == "Help": clean_name = "ModuleHelp"
+        if clean_name == "Parrot": clean_name = "ModuleParrot"
+        if clean_name == "EchoLink": clean_name = "ModuleEchoLink"
+
         clean_modules.append(clean_name)
         
     modules_str = ",".join(clean_modules)
@@ -122,7 +125,7 @@ def main():
         "DefaultTG": data.get('DefaultTG', '0'),
         "Mode": "FM",
         "Type": "1", 
-        "Echolink": "1" if 'EchoLink' in modules_str or 'ModuleEchoLink' in modules_str else "0",
+        "Echolink": "1" if 'ModuleEchoLink' in modules_str else "0",
         "Website": "http://sqlink.pl",
         "LinkedTo": "SQLink"
     }
@@ -162,7 +165,6 @@ def main():
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
             "MODULES": modules_str
         },
-        # ZMIANA 2: Dodano sekcje dla ModuleHelp i ModuleParrot
         "ModuleHelp": {
             "NAME": "Help",
             "PLUGIN_NAME": "Help",
