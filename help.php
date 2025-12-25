@@ -64,7 +64,19 @@
 </div>
 
 <div class="help-section">
-    <div class="help-title"><span class="help-icon">🎚️</span> 4. Audio (CM108) - Nie kręć bez potrzeby!</div>
+    <div class="help-title"><span class="help-icon">📱</span> 4. Zakładka DTMF (Pilot)</div>
+    <div class="help-text">
+        Tutaj sterujesz hotspotem bez dotykania mikrofonu radia.
+        <ul>
+            <li><strong>👥 Grupy Rozmowne:</strong> Kliknięcie kafelka (np. TG 260) natychmiast przełącza Cię na tę grupę.</li>
+            <li><strong>🦜 Papuga (Test Audio):</strong> Narzędzie do sprawdzania, jak Cię słychać.</li>
+            <li><strong>⌨️ Klawiatura:</strong> Pozwala wpisać dowolny kod DTMF (np. ukryte funkcje SVXLink).</li>
+        </ul>
+    </div>
+</div>
+
+<div class="help-section">
+    <div class="help-title"><span class="help-icon">🎚️</span> 5. Audio (CM108) - Nie kręć bez potrzeby!</div>
     <div class="help-text">
         Suwaki w zakładce Audio są bardzo czułe i skalibrowane pod karty CM108.
         <ul>
@@ -85,7 +97,7 @@
 </div>
 
 <div class="help-section">
-    <div class="help-title"><span class="help-icon">⚡</span> 5. Zasilanie i Aktualizacje</div>
+    <div class="help-title"><span class="help-icon">⚡</span> 6. Zasilanie i Aktualizacje</div>
     <div class="help-text">
         W zakładce <strong>Zasilanie</strong> masz centrum sterowania życiem maliny.
         <ul>
@@ -97,7 +109,7 @@
 </div>
 
 <div class="help-section">
-    <div class="help-title" style="color: #BA68C8;"><span class="help-icon">💡</span> 6. Wskazówki i Nowe Funkcje (Warto wiedzieć)</div>
+    <div class="help-title" style="color: #BA68C8;"><span class="help-icon">💡</span> 7. Wskazówki i Nowe Funkcje (Warto wiedzieć)</div>
     <div class="help-text">
         Oto kilka przydatnych funkcji, które ułatwią Ci życie z Hotspotem:
         <ul>
