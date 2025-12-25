@@ -1,5 +1,4 @@
 <?php
-    // --- 1. API TELEMETRII (Raspberry Pi) ---
     if (isset($_GET['ajax_stats'])) {
         header('Content-Type: application/json');
         $stats = [];
@@ -23,7 +22,6 @@
         echo json_encode($stats); exit;
     }
 
-    // --- 2. OBSŁUGA DTMF ---
     if (isset($_POST['ajax_dtmf'])) {
         $code = $_POST['ajax_dtmf'];
         if (preg_match('/^[0-9A-D*#]+$/', $code)) {
@@ -32,7 +30,6 @@
         } else { echo "ERROR"; } exit;
     }
 
-    // --- 3. AUDIO (RPi Simple Mixer + Nowe Funkcje) ---
     $CARD_ID = 0;
     $MIXER_IDS = ['Mic_Cap_Sw' => 7, 'Mic_Cap_Vol' => 8, 'Auto_Gain_Ctrl' => 9, 'Spk_Play_Sw' => 5, 'Spk_Play_Vol' => 6];
     $audio = []; $audio_msg = '';
@@ -45,7 +42,6 @@
         return 0;
     }
 
-    // Zapis Audio (Suwaki)
     if (isset($_POST['save_audio'])) {
         foreach (['mic_cap_vol' => 'Mic_Cap_Vol', 'spk_play_vol' => 'Spk_Play_Vol'] as $p => $m) {
             $numid = $MIXER_IDS[$m]; $val = (int)$_POST[$p];
@@ -61,7 +57,6 @@
 
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
-    // --- 4. PARSOWANIE CONFIGU SVXLINK ---
     function parse_svx_conf($file) {
         $ini = []; $curr = "GLOBAL"; if (!file_exists($file)) return [];
         foreach (file($file) as $line) {
@@ -88,20 +83,12 @@
     ];
 
     $jsonFile = '/var/www/html/radio_config.json';
-    // Domyślne wartości z nowymi polami QTH/Operator
     $radio = [
-        "rx" => "432.8500", 
-        "tx" => "432.8500", 
-        "ctcss" => "0000", 
-        "sq" => "2", 
-        "desc" => "Brak opisu",
-        "qth_name" => "",
-        "qth_city" => "",
-        "qth_loc" => ""
+        "rx" => "432.8500", "tx" => "432.8500", "ctcss" => "0000", "sq" => "2", "desc" => "Brak opisu",
+        "qth_name" => "", "qth_city" => "", "qth_loc" => ""
     ];
     if (file_exists($jsonFile)) { $loaded = json_decode(file_get_contents($jsonFile), true); if ($loaded) $radio = array_merge($radio, $loaded); }
 
-    // --- 5. AKCJE SYSTEMOWE I CONFIG ---
     if (isset($_POST['save_svx_full'])) {
         $newData = $_POST; unset($newData['save_svx_full'], $newData['active_tab']); 
         file_put_contents('/tmp/svx_new_settings.json', json_encode($newData));
@@ -110,7 +97,6 @@
         echo "<div class='alert alert-success'>Zapisano! Restart...</div><meta http-equiv='refresh' content='3'>";
     }
     
-    // [NOWE] Obsługa Auto-Proxy
     if (isset($_POST['auto_proxy'])) {
         if (file_exists('/usr/local/bin/auto_proxy.py')) {
              shell_exec('sudo /usr/bin/python3 /usr/local/bin/auto_proxy.py > /dev/null 2>&1 &');
@@ -120,7 +106,6 @@
         }
     }
 
-    // --- GPIO / SETUP RADIO ---
     if (isset($_POST['gpio_setup'])) {
         shell_exec("sudo /usr/bin/python3 /usr/local/bin/setup_radio.py > /dev/null 2>&1");
         echo "<div class='alert alert-success'>Konfiguracja Karty/GPIO zaktualizowana!</div><meta http-equiv='refresh' content='2'>";
@@ -130,49 +115,19 @@
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
     
-    // --- GIT UPDATE (NOWA LOGIKA STATUSÓW) ---
     if (isset($_POST['git_update'])) {
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
-        
-        // Tutaj jest kluczowa zmiana: szukamy STATUS: SUCCESS lub STATUS: UP_TO_DATE
         if (strpos($out, 'STATUS: SUCCESS') !== false) {
-            // SUKCES - RESTART
             shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &');
-            echo "
-            <div class='alert alert-success' style='text-align:left;'>
-                <strong>✅ AKTUALIZACJA ZAKOŃCZONA SUKCESEM!</strong><br>
-                System zostanie zrestartowany za <span id='cnt'>5</span> sekund...
-                <pre style='font-size:10px; margin-top:5px; background:#111; padding:5px; border-radius:3px; max-height:200px; overflow:auto;'>$out</pre>
-            </div>
-            <script>
-                var sec = 5;
-                setInterval(function(){
-                    sec--;
-                    document.getElementById('cnt').innerText = sec;
-                    if(sec <= 0) window.location.href = '/';
-                }, 1000);
-            </script>
-            ";
+            echo "<div class='alert alert-success'><strong>✅ ZAKTUALIZOWANO!</strong> Restart...</div><script>setTimeout(function(){window.location.href='/';},5000);</script>";
         } elseif (strpos($out, 'STATUS: UP_TO_DATE') !== false) {
-             // BRAK ZMIAN - BEZ RESTARTU
-             echo "
-             <div class='alert alert-warning' style='text-align:left;'>
-                <strong>⚠️ SYSTEM JEST JUŻ AKTUALNY</strong><br>
-                Brak nowych zmian do pobrania.
-                <pre style='font-size:10px; margin-top:5px; background:#222; padding:5px; border-radius:3px;'>$out</pre>
-             </div><meta http-equiv='refresh' content='4'>";
+             echo "<div class='alert alert-warning'>⚠️ SYSTEM AKTUALNY</div><meta http-equiv='refresh' content='2'>";
         } else {
-            // BŁĄD
-            echo "
-            <div class='alert alert-error' style='text-align:left;'>
-                <strong>❌ BŁĄD AKTUALIZACJI!</strong><br>
-                Coś poszło nie tak. Sprawdź logi poniżej.
-                <pre style='font-size:10px; margin-top:5px; background:#300; padding:5px; border-radius:3px;'>$out</pre>
-            </div>";
+            echo "<div class='alert alert-error'>❌ BŁĄD AKTUALIZACJI!<pre>$out</pre></div>";
         }
     }
 
-    // --- 6. WIFI (NMCLI) ---
+    // --- 6. WIFI ---
     if (isset($_POST['wifi_scan'])) {
         $output = shell_exec("sudo /usr/bin/nmcli -f SSID,SIGNAL dev wifi list 2>&1");
         $lines = explode("\n", $output);
@@ -180,48 +135,29 @@
             $line = trim($line);
             if (empty($line) || strpos($line, "SSID") !== false || strpos($line, "--") !== false) continue;
             $parts = preg_split('/\s+/', $line);
-            $ssid_part = $parts[0];
-            $signal_part = end($parts);
-            if (!empty($ssid_part) && $ssid_part != "--") {
-                 $wifi_scan_results[] = ['ssid' => $ssid_part, 'signal' => $signal_part];
-            }
+            $ssid_part = $parts[0]; $signal_part = end($parts);
+            if (!empty($ssid_part) && $ssid_part != "--") { $wifi_scan_results[] = ['ssid' => $ssid_part, 'signal' => $signal_part]; }
         }
     }
     
     if (isset($_POST['wifi_connect'])) {
-        $ssid = $_POST['ssid']; 
-        $pass = $_POST['pass'];
+        $ssid = $_POST['ssid']; $pass = $_POST['pass'];
         shell_exec("sudo /usr/bin/nmcli dev wifi connect " . escapeshellarg($ssid) . " password " . escapeshellarg($pass) . " > /dev/null 2>&1 &");
-        echo "<div class='alert alert-success'>Wysłano polecenie połączenia z siecią: $ssid</div>";
+        echo "<div class='alert alert-success'>Łączenie z: $ssid</div>";
     }
 
     if (isset($_POST['wifi_delete'])) {
         $ssid = $_POST['ssid'];
         shell_exec("sudo /usr/bin/nmcli connection delete " . escapeshellarg($ssid) . " > /dev/null 2>&1 &");
-        echo "<div class='alert alert-warning'>Usuwanie sieci: $ssid</div><meta http-equiv='refresh' content='2'>";
+        echo "<div class='alert alert-warning'>Usuwanie: $ssid</div><meta http-equiv='refresh' content='2'>";
     }
 
-    // Pobieranie listy zapamiętanych sieci przez NMCLI (FILTR UKRYWANIA)
     $saved_wifi_list = [];
     $nm_saved = shell_exec("sudo /usr/bin/nmcli -t -f NAME connection show 2>/dev/null");
-    
-    // LISTA SIECI DO UKRYCIA
-    $ignored_list = [
-        "Wired connection 1",
-        "lo",
-        "Rescue_AP",
-        "SQLink_WiFi_AP",
-        "preconfigured"
-    ];
-
+    $ignored_list = ["Wired connection 1", "lo", "Rescue_AP", "SQLink_WiFi_AP", "preconfigured"];
     if ($nm_saved) {
         $lines = explode("\n", trim($nm_saved));
-        foreach($lines as $l) {
-            $l = trim($l);
-            if(!empty($l) && !in_array($l, $ignored_list)) {
-                $saved_wifi_list[] = $l;
-            }
-        }
+        foreach($lines as $l) { $l = trim($l); if(!empty($l) && !in_array($l, $ignored_list)) { $saved_wifi_list[] = $l; } }
     }
 ?>
 <!DOCTYPE html>
@@ -249,6 +185,15 @@
         <div class="t-box"><div class="t-label">Disk Used</div><div class="t-val" id="t-disk">...</div><div class="progress-bg"><div class="progress-fill" id="t-disk-bar" style="width: 0%;"></div></div></div>
         <div class="t-box"><div class="t-label">Network</div><div class="t-val" id="t-net-type">...</div><div style="font-size:9px; color:#aaa;" id="t-ip">...</div></div>
         <div class="t-box"><div class="t-label">Hardware</div><div class="t-val" id="t-hw" style="font-size:10px; margin-top:5px;">...</div></div>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-box"><div class="info-label">Logiki</div><div class="info-value" style="font-size:11px;"><?php echo str_replace(',', ', ', $glob['LOGICS'] ?? '-'); ?></div></div>
+        <div class="info-box"><div class="info-label">Moduły</div><div class="info-value" style="font-size:11px;"><?php echo $vals['Modules']; ?></div></div>
+        <div class="info-box"><div class="info-label">TG Default</div><div class="info-value hl"><?php echo $vals['DefaultTG']; ?></div></div>
+        <div class="info-box"><div class="info-label">TG Active</div><div class="info-value hl" id="tg-active">---</div></div>
+        <div class="info-box"><div class="info-label">Reflector</div><div class="info-value" id="ref-status">---</div></div>
+        <div class="info-box"><div class="info-label">Uptime</div><div class="info-value" style="font-size:11px;"><?php echo shell_exec("uptime -p"); ?></div></div>
     </div>
 
     <div class="tabs">
