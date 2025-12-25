@@ -5,6 +5,7 @@ import json
 
 CONFIG_FILE = "/etc/svxlink/svxlink.conf"
 INPUT_JSON = "/tmp/svx_new_settings.json"
+RADIO_JSON = "/var/www/html/radio_config.json"
 
 def load_lines(path):
     if not os.path.exists(path): return []
@@ -70,7 +71,6 @@ def main():
 
     lines = load_lines(CONFIG_FILE)
 
-    # LOGIKA ECHOLINK (BEZ HASŁA = OFF)
     modules_str = data.get('Modules', 'Help,Parrot,EchoLink')
     el_pass = data.get('EL_Password', '')
     
@@ -78,6 +78,16 @@ def main():
         modules_list = [m.strip() for m in modules_str.split(',')]
         modules_list = [m for m in modules_list if 'EchoLink' not in m]
         modules_str = ",".join(modules_list)
+
+    qth_name = data.get('qth_name', '')
+    qth_city = data.get('qth_city', '')
+    qth_loc = data.get('qth_loc', '')
+
+    loc_parts = []
+    if qth_city: loc_parts.append(qth_city)
+    if qth_loc: loc_parts.append(qth_loc)
+    if qth_name: loc_parts.append(f"(Op: {qth_name})")
+    location_str = ", ".join(loc_parts)
 
     mapping = {
         "ReflectorLogic": {
@@ -92,7 +102,8 @@ def main():
             "TGSTBEEP_ENABLE": data.get('Beep3Tone'),
             "TGREANON_ENABLE": data.get('AnnounceTG'),
             "REFCON_ENABLE": data.get('RefStatusInfo'),
-            "UDP_HEARTBEAT_INTERVAL": "10" 
+            "UDP_HEARTBEAT_INTERVAL": "10",
+            "LOCATION": f'"{location_str}"'
         },
         "SimplexLogic": {
             "CALLSIGN": data.get('Callsign'),
@@ -120,6 +131,22 @@ def main():
                      lines = update_key_in_lines(lines, section, cfg_key, json_val)
 
     save_lines(CONFIG_FILE, lines)
+
+    radio_data = {}
+    if os.path.exists(RADIO_JSON):
+        with open(RADIO_JSON, 'r') as f:
+            try:
+                radio_data = json.load(f)
+            except:
+                pass
+
+    radio_data['qth_name'] = qth_name
+    radio_data['qth_city'] = qth_city
+    radio_data['qth_loc'] = qth_loc
+
+    with open(RADIO_JSON, 'w') as f:
+        json.dump(radio_data, f, indent=4)
+
     print("SUKCES")
 
 if __name__ == "__main__":

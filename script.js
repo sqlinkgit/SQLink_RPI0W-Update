@@ -44,13 +44,12 @@ function initModuleToggles() {
     
     var currentModules = input.value.split(',').map(s => s.trim());
     
-    
-    var btnIds = ['ModuleHelp', 'ModuleParrot', 'ModuleEchoLink', 'ModuleMetarInfo'];
+
+    var btnIds = ['ModuleHelp', 'ModuleParrot', 'ModuleEchoLink'];
     
     btnIds.forEach(function(modName) {
         var btn = document.getElementById('btn-' + modName);
         if(btn) {
-            
             var shortName = modName.replace('Module', '');
             if (currentModules.includes(modName) || currentModules.includes(shortName)) {
                 btn.classList.add('active');
@@ -60,14 +59,14 @@ function initModuleToggles() {
         }
     });
 
-    
+
     var elPassInput = document.getElementById('el-pass');
     if(elPassInput) {
         elPassInput.addEventListener('input', function() {
             if(this.value.length > 0) {
                 var elBtn = document.getElementById('btn-ModuleEchoLink');
                 if(elBtn && !elBtn.classList.contains('active')) {
-                    toggleModule('ModuleEchoLink'); 
+                    toggleModule('ModuleEchoLink');
                 }
             }
         });
@@ -82,19 +81,14 @@ function toggleModule(modName) {
     var isActive = btn.classList.contains('active');
     var currentList = input.value.split(',').map(s => s.trim()).filter(s => s !== "");
     
-
-    
     if (isActive) {
-
         btn.classList.remove('active');
-
         var shortName = modName.replace('Module', '');
         currentList = currentList.filter(s => s !== modName && s !== shortName);
     } else {
-
         btn.classList.add('active');
         if (!currentList.includes(modName)) {
-            currentList.push(modName); 
+            currentList.push(modName);
         }
     }
     
