@@ -6,6 +6,7 @@ import json
 CONFIG_FILE = "/etc/svxlink/svxlink.conf"
 INPUT_JSON = "/tmp/svx_new_settings.json"
 RADIO_JSON = "/var/www/html/radio_config.json"
+NODE_INFO_FILE = "/etc/svxlink/node_info.json"
 
 def load_lines(path):
     if not os.path.exists(path): return []
@@ -83,6 +84,48 @@ def main():
     qth_city = data.get('qth_city', '')
     qth_loc = data.get('qth_loc', '')
 
+    
+    rx_freq = ""
+    tx_freq = ""
+    ctcss = "0"
+    
+    if os.path.exists(RADIO_JSON):
+        try:
+            with open(RADIO_JSON, 'r') as rf:
+                rdata = json.load(rf)
+                rx_freq = rdata.get("rx", "")
+                tx_freq = rdata.get("tx", "")
+                ctcss = rdata.get("ctcss", "0")
+        except:
+            pass
+
+    node_info_data = {
+        "Location": qth_city,
+        "Locator": qth_loc,
+        "Sysop": qth_name,
+        "LAT": "0.0", 
+        "LONG": "0.0",
+        "TXFREQ": tx_freq,
+        "RXFREQ": rx_freq,
+        "CTCSS": ctcss,
+        "DefaultTG": data.get('DefaultTG', '0'),
+        "Mode": "FM",
+        "Type": "1", 
+        "Echolink": "1" if 'EchoLink' in modules_str else "0",
+        "Website": "http://sqlink.pl",
+        "LinkedTo": "SQLink"
+    }
+
+    try:
+        with open(NODE_INFO_FILE, 'w') as nf:
+            json.dump(node_info_data, nf, indent=4)
+        os.chmod(NODE_INFO_FILE, 0o644) 
+    except Exception as e:
+        print(f"Error writing node_info.json: {e}")
+
+    
+
+    
     loc_parts = []
     if qth_city: loc_parts.append(qth_city)
     if qth_loc: loc_parts.append(qth_loc)
@@ -103,7 +146,8 @@ def main():
             "TGREANON_ENABLE": data.get('AnnounceTG'),
             "REFCON_ENABLE": data.get('RefStatusInfo'),
             "UDP_HEARTBEAT_INTERVAL": "10",
-            "LOCATION": f'"{location_str}"'
+            "LOCATION": f'"{location_str}"',
+            "NODE_INFO_FILE": NODE_INFO_FILE
         },
         "SimplexLogic": {
             "CALLSIGN": data.get('Callsign'),
@@ -132,6 +176,7 @@ def main():
 
     save_lines(CONFIG_FILE, lines)
 
+    
     radio_data = {}
     if os.path.exists(RADIO_JSON):
         with open(RADIO_JSON, 'r') as f:
