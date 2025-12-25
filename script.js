@@ -37,14 +37,12 @@ function openTab(evt, tabName) {
     localStorage.setItem('activeTab', tabName);
 }
 
-
 function initModuleToggles() {
     var input = document.getElementById('input-modules');
     if(!input) return;
     
     var currentModules = input.value.split(',').map(s => s.trim());
     
-
     var btnIds = ['ModuleHelp', 'ModuleParrot', 'ModuleEchoLink'];
     
     btnIds.forEach(function(modName) {
@@ -58,7 +56,6 @@ function initModuleToggles() {
             }
         }
     });
-
 
     var elPassInput = document.getElementById('el-pass');
     if(elPassInput) {
@@ -280,10 +277,12 @@ function showTooltip(e, callsign) {
     $("#nt-sw").text((info.sw || "") + " " + (info.swVer || ""));
     
     var name = "---";
-    if (info.qth && info.qth.length > 0 && info.qth[0].name) {
-         name = info.qth[0].name;
+    if (info.Sysop) {
+         name = info.Sysop;
     } else if (info.sysop) {
          name = info.sysop;
+    } else if (info.qth && info.qth.length > 0 && info.qth[0].name) {
+         name = info.qth[0].name;
     }
     $("#nt-name").text(name);
 
@@ -291,12 +290,19 @@ function showTooltip(e, callsign) {
     $("#nt-tg").text(activeTg);
     
     var locator = "---";
-    if (info.qth && info.qth.length > 0 && info.qth[0].pos && info.qth[0].pos.loc) {
+    if (info.Locator) {
+        locator = info.Locator;
+    } else if (info.qth && info.qth.length > 0 && info.qth[0].pos && info.qth[0].pos.loc) {
         locator = info.qth[0].pos.loc;
     }
     $("#nt-qth").text(locator);
 
-    var location = info.nodeLocation || "---";
+    var location = "---";
+    if (info.Location) {
+        location = info.Location;
+    } else if (info.nodeLocation) {
+        location = info.nodeLocation;
+    }
     $("#nt-loc").text(location);
     
     var monitored = "---";
