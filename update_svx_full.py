@@ -72,19 +72,17 @@ def main():
 
     lines = load_lines(CONFIG_FILE)
 
-    modules_str = data.get('Modules', 'Help,Parrot,EchoLink')
+    modules_str = data.get('Modules', 'ModuleHelp,ModuleParrot,ModuleEchoLink')
     el_pass = data.get('EL_Password', '')
     
     modules_list = [m.strip() for m in modules_str.split(',')]
     clean_modules = []
     
     for m in modules_list:
-        if m.startswith("Module") and len(m) > 6:
-            clean_name = m[6:]
-        else:
-            clean_name = m
+
+        clean_name = m
             
-        if clean_name == "EchoLink" and not el_pass:
+        if clean_name == "ModuleEchoLink" and not el_pass:
             continue
             
         if clean_name == "MetarInfo":
@@ -124,7 +122,7 @@ def main():
         "DefaultTG": data.get('DefaultTG', '0'),
         "Mode": "FM",
         "Type": "1", 
-        "Echolink": "1" if 'EchoLink' in modules_str else "0",
+        "Echolink": "1" if 'EchoLink' in modules_str or 'ModuleEchoLink' in modules_str else "0",
         "Website": "http://sqlink.pl",
         "LinkedTo": "SQLink"
     }
@@ -163,6 +161,20 @@ def main():
             "CALLSIGN": data.get('Callsign'),
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
             "MODULES": modules_str
+        },
+        # ZMIANA 2: Dodano sekcje dla ModuleHelp i ModuleParrot
+        "ModuleHelp": {
+            "NAME": "Help",
+            "PLUGIN_NAME": "Help",
+            "ID": "0",
+            "TIMEOUT": "60"
+        },
+        "ModuleParrot": {
+            "NAME": "Parrot",
+            "PLUGIN_NAME": "Parrot",
+            "ID": "1",
+            "TIMEOUT": "60",
+            "FIFO_LEN": "60"
         },
         "ModuleEchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),
