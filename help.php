@@ -2,6 +2,7 @@
 <div style="text-align: center; margin-bottom: 20px; font-size: 0.9em; color: #888; background: #222; padding: 5px; border-radius: 4px; border: 1px solid #444;">
     ℹ️ System zaprojektowany wyłącznie dla: <strong style="color: #4CAF50;">Raspberry Pi Zero W</strong> + Karta <strong style="color: #2196F3;">CM108 USB</strong>
 </div>
+
 <div class="help-section">
     <div class="help-title"><span class="help-icon">🖥️</span> 1. Twój Kokpit (Dashboard)</div>
     <div class="help-text">
@@ -21,10 +22,11 @@
         </ul>
     </div>
 </div>
+
 <div class="help-section" style="border-left: 5px solid #FF9800;">
     <div class="help-title"><span class="help-icon">🆘</span> 2. Tryb Ratunkowy WiFi (Ważne!)</div>
     <div class="help-text">
-        Twoje Raspberry Pi Zero W nie ma kabla, więc co zrobić, gdy zmienisz router lub pójdziesz z nim w teren?
+        Twoje Raspberry Pi Zero W nie ma gniazda Ethernet, więc co zrobić, gdy zmienisz router lub pójdziesz z nim w teren?
         <br><br>
         <div style="border: 3px solid #FF9800; padding: 15px; border-radius: 8px;">
             <strong>🚨 Jak odzyskać łączność bez monitora?</strong><br><br>
@@ -38,6 +40,7 @@
         </div>
     </div>
 </div>
+
 <div class="help-section">
     <div class="help-title"><span class="help-icon">🔄</span> 3. Dwa Światy: Reflektor i EchoLink</div>
     <div class="help-text">
@@ -59,6 +62,7 @@
         </div>
     </div>
 </div>
+
 <div class="help-section">
     <div class="help-title"><span class="help-icon">🎚️</span> 4. Audio (CM108) - Nie kręć bez potrzeby!</div>
     <div class="help-text">
@@ -79,6 +83,7 @@
         </div>
     </div>
 </div>
+
 <div class="help-section">
     <div class="help-title"><span class="help-icon">⚡</span> 5. Zasilanie i Aktualizacje</div>
     <div class="help-text">
@@ -90,6 +95,26 @@
         </ul>
     </div>
 </div>
+
+<div class="help-section">
+    <div class="help-title" style="color: #BA68C8;"><span class="help-icon">💡</span> 6. Wskazówki i Nowe Funkcje (Warto wiedzieć)</div>
+    <div class="help-text">
+        Oto kilka przydatnych funkcji, które ułatwią Ci życie z Hotspotem:
+        <ul>
+            <li style="margin-bottom: 8px;"><strong>🌍 Twoja Wizytówka w Sieci:</strong>
+                <br>W zakładce <strong>Config</strong> uzupełnij nową sekcję <em>"Lokalizacja i Operator"</em>. Dzięki temu Twoje Imię i Miasto będą widoczne dla innych kolegów w sieci (w dymkach informacyjnych i na mapie).
+            </li>
+            <li style="margin-bottom: 8px;"><strong>🖱️ Szybki Podgląd QRZ:</strong>
+                <br>W zakładce <strong>Nodes</strong> (Węzły) kafelki stacji są interaktywne. <strong>Kliknij w znak stacji</strong>, aby natychmiast otworzyć jej profil na QRZ.com w nowym oknie.
+            </li>
+            <li><strong>🎛️ Wygodne Moduły:</strong>
+                <br>W Konfiguracji nie musisz już wpisywać nazw modułów ręcznie. Użyj przycisków, aby włączać/wyłączać funkcje (Help, Parrot, EchoLink). 
+                <br><span style="color:#4CAF50; font-weight:bold;">Zielony</span> = Włączony, <span style="color:#666; font-weight:bold;">Szary</span> = Wyłączony.
+            </li>
+        </ul>
+    </div>
+</div>
+
 <div class="help-section" style="border:none;">
     <div class="help-title"><span class="help-icon">🔧</span> Szybka Pomoc (Q&A)</div>
     <div class="help-text">
