@@ -1,4 +1,5 @@
 <?php
+    // --- 1. API TELEMETRII (Raspberry Pi) ---
     if (isset($_GET['ajax_stats'])) {
         header('Content-Type: application/json');
         $stats = [];
@@ -22,6 +23,7 @@
         echo json_encode($stats); exit;
     }
 
+    // --- 2. OBSŁUGA DTMF ---
     if (isset($_POST['ajax_dtmf'])) {
         $code = $_POST['ajax_dtmf'];
         if (preg_match('/^[0-9A-D*#]+$/', $code)) {
@@ -30,6 +32,7 @@
         } else { echo "ERROR"; } exit;
     }
 
+    // --- 3. AUDIO (RPi Simple Mixer) ---
     $CARD_ID = 0;
     $MIXER_IDS = ['Mic_Cap_Sw' => 7, 'Mic_Cap_Vol' => 8, 'Auto_Gain_Ctrl' => 9, 'Spk_Play_Sw' => 5, 'Spk_Play_Vol' => 6];
     $audio = []; $audio_msg = '';
@@ -57,6 +60,7 @@
 
     foreach ($MIXER_IDS as $k => $id) $audio[$k] = ($id > 0) ? get_alsa_value($CARD_ID, $id) : 0;
 
+    // --- 4. PARSOWANIE CONFIGU SVXLINK ---
     function parse_svx_conf($file) {
         $ini = []; $curr = "GLOBAL"; if (!file_exists($file)) return [];
         foreach (file($file) as $line) {
@@ -89,6 +93,7 @@
     ];
     if (file_exists($jsonFile)) { $loaded = json_decode(file_get_contents($jsonFile), true); if ($loaded) $radio = array_merge($radio, $loaded); }
 
+    // --- 5. AKCJE SYSTEMOWE ---
     if (isset($_POST['save_svx_full'])) {
         $newData = $_POST; unset($newData['save_svx_full'], $newData['active_tab']); 
         file_put_contents('/tmp/svx_new_settings.json', json_encode($newData));
@@ -115,15 +120,45 @@
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
     
+    // --- GIT UPDATE (PEŁNA WERSJA Z LOGAMI I LICZNIKIEM) ---
     if (isset($_POST['git_update'])) {
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
+        
         if (strpos($out, 'STATUS: SUCCESS') !== false) {
+            // SUKCES - RESTART
             shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &');
-            echo "<div class='alert alert-success'><strong>✅ ZAKTUALIZOWANO!</strong> Restart...</div><script>setTimeout(function(){window.location.href='/';},5000);</script>";
+            echo "
+            <div class='alert alert-success' style='text-align:left;'>
+                <strong>✅ AKTUALIZACJA ZAKOŃCZONA SUKCESEM!</strong><br>
+                System zostanie zrestartowany za <span id='cnt'>5</span> sekund...
+                <pre style='font-size:10px; margin-top:5px; background:#111; padding:5px; border-radius:3px; max-height:200px; overflow:auto;'>$out</pre>
+            </div>
+            <script>
+                var sec = 5;
+                setInterval(function(){
+                    sec--;
+                    var el = document.getElementById('cnt');
+                    if(el) el.innerText = sec;
+                    if(sec <= 0) window.location.href = '/';
+                }, 1000);
+            </script>
+            ";
         } elseif (strpos($out, 'STATUS: UP_TO_DATE') !== false) {
-             echo "<div class='alert alert-warning'>⚠️ SYSTEM AKTUALNY</div><meta http-equiv='refresh' content='2'>";
+             // BRAK ZMIAN
+             echo "
+             <div class='alert alert-warning' style='text-align:left;'>
+                <strong>⚠️ SYSTEM JEST JUŻ AKTUALNY</strong><br>
+                Brak nowych zmian do pobrania.
+                <pre style='font-size:10px; margin-top:5px; background:#222; padding:5px; border-radius:3px;'>$out</pre>
+             </div><meta http-equiv='refresh' content='4'>";
         } else {
-            echo "<div class='alert alert-error'>❌ BŁĄD AKTUALIZACJI!<pre>$out</pre></div>";
+            // BŁĄD
+            echo "
+            <div class='alert alert-error' style='text-align:left;'>
+                <strong>❌ BŁĄD AKTUALIZACJI!</strong><br>
+                Coś poszło nie tak. Sprawdź logi poniżej.
+                <pre style='font-size:10px; margin-top:5px; background:#300; padding:5px; border-radius:3px;'>$out</pre>
+            </div>";
         }
     }
 
