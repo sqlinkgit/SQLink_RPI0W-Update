@@ -40,7 +40,7 @@
         font-weight: bold;
         color: #fff;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
         .dash-grid { grid-template-columns: repeat(2, 1fr); }
     }
 </style>
