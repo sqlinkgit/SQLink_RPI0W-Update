@@ -89,6 +89,7 @@ chmod +x /usr/local/bin/clean_logs_on_boot.sh
 cat <<EOF > /etc/rc.local
 #!/bin/sh -e
 /usr/local/bin/clean_logs_on_boot.sh &
+/usr/local/bin/wifi_guard.sh &
 exit 0
 EOF
 chmod +x /etc/rc.local
