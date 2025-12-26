@@ -93,6 +93,25 @@ function toggleModule(modName) {
     input.value = currentList.join(',');
 }
 
+function setMapStyle(style) {
+    localStorage.setItem('mapStyle', style);
+    updateMapButtons(style);
+}
+
+function updateMapButtons(activeStyle) {
+    var styles = ['dark', 'light', 'osm'];
+    styles.forEach(function(s) {
+        var btn = document.getElementById('btn-map-' + s);
+        if(btn) {
+            if(s === activeStyle) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var storedTab = localStorage.getItem('activeTab');
     if (storedTab) { openTab(null, storedTab); } else { openTab(null, 'Dashboard'); }
@@ -104,6 +123,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     initModuleToggles();
+    
+    var currentMapStyle = localStorage.getItem('mapStyle') || 'dark';
+    updateMapButtons(currentMapStyle);
 });
 
 function updateStats() {
@@ -359,18 +381,35 @@ function qthToLatLon(qth) {
 function openGridMapper() {
     document.getElementById('map-overlay').style.display = 'flex';
     
-    if (!mapInstance) {
-        mapInstance = L.map('map-container').setView([52.0, 19.0], 6);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(mapInstance);
+    var style = localStorage.getItem('mapStyle') || 'dark';
+    
+    var tileUrl = '';
+    var tileOptions = {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    };
+    
+    if(style === 'light') {
+        tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        tileOptions.subdomains = 'abcd';
+        tileOptions.attribution += ' &copy; CARTO';
+    } else if(style === 'osm') {
+        tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        tileOptions.subdomains = 'abc';
+    } else {
+        tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        tileOptions.subdomains = 'abcd';
+        tileOptions.attribution += ' &copy; CARTO';
     }
     
-    mapInstance.eachLayer(function (layer) {
-        if (layer instanceof L.Marker) { mapInstance.removeLayer(layer); }
-    });
+    if (mapInstance) {
+        mapInstance.remove();
+        mapInstance = null;
+    }
+
+    mapInstance = L.map('map-container').setView([52.0, 19.0], 6);
+    
+    L.tileLayer(tileUrl, tileOptions).addTo(mapInstance);
 
     var nodes = cachedNodesData;
     if (!nodes) return;
