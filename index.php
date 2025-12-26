@@ -33,7 +33,13 @@
     }
 
     // --- 3. AUDIO (RPi Simple Mixer) ---
-    $CARD_ID = 0;
+    $cards = shell_exec("cat /proc/asound/cards");
+    if (preg_match('/(\d+)\s\[(Device|Set|USB)/', $cards, $matches)) {
+        $CARD_ID = (int)$matches[1];
+    } else {
+        $CARD_ID = 0;
+    }
+
     $MIXER_IDS = ['Mic_Cap_Sw' => 7, 'Mic_Cap_Vol' => 8, 'Auto_Gain_Ctrl' => 9, 'Spk_Play_Sw' => 5, 'Spk_Play_Vol' => 6];
     $audio = []; $audio_msg = '';
     
@@ -120,12 +126,11 @@
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
     
-    // --- GIT UPDATE (PEŁNA WERSJA Z LOGAMI I LICZNIKIEM) ---
+    // --- GIT UPDATE ---
     if (isset($_POST['git_update'])) {
         $out = shell_exec("sudo /usr/local/bin/update_dashboard.sh 2>&1");
         
         if (strpos($out, 'STATUS: SUCCESS') !== false) {
-            // SUKCES - RESTART
             shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &');
             echo "
             <div class='alert alert-success' style='text-align:left;'>
@@ -144,7 +149,6 @@
             </script>
             ";
         } elseif (strpos($out, 'STATUS: UP_TO_DATE') !== false) {
-             // BRAK ZMIAN
              echo "
              <div class='alert alert-warning' style='text-align:left;'>
                 <strong>⚠️ SYSTEM JEST JUŻ AKTUALNY</strong><br>
@@ -152,7 +156,6 @@
                 <pre style='font-size:10px; margin-top:5px; background:#222; padding:5px; border-radius:3px;'>$out</pre>
              </div><meta http-equiv='refresh' content='4'>";
         } else {
-            // BŁĄD
             echo "
             <div class='alert alert-error' style='text-align:left;'>
                 <strong>❌ BŁĄD AKTUALIZACJI!</strong><br>
