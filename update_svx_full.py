@@ -35,11 +35,15 @@ def update_key_in_lines(lines, section, key, value):
         if stripped.startswith("[") and stripped.endswith("]"):
             in_section = (stripped == section_header)
         
-        if in_section and stripped.startswith(f"{key}="):
-            new_lines.append(f"{key}={value}\n")
-            key_found = True
-        else:
-            new_lines.append(line)
+        if in_section and "=" in stripped and not stripped.startswith(("#", ";")):
+            parts = stripped.split("=", 1)
+            current_key = parts[0].strip()
+            if current_key == key:
+                new_lines.append(f"{key}={value}\n")
+                key_found = True
+                continue 
+
+        new_lines.append(line)
 
     if not key_found:
         final_lines = []
@@ -51,17 +55,17 @@ def update_key_in_lines(lines, section, key, value):
                 in_tgt_sec = True
                 final_lines.append(l)
                 continue
-            
             if in_tgt_sec and s.startswith("["):
                 if not added:
                     final_lines.append(f"{key}={value}\n")
                     added = True
                 in_tgt_sec = False
-            
             final_lines.append(l)
-        
+        if in_tgt_sec and not added:
+             final_lines.append(f"{key}={value}\n")
+             added = True
         if not added:
-            final_lines.append(f"{key}={value}\n")
+             final_lines.append(f"{key}={value}\n")
         return final_lines
 
     return new_lines
@@ -72,28 +76,13 @@ def main():
 
     lines = load_lines(CONFIG_FILE)
 
-    modules_str = data.get('Modules', 'ModuleHelp,ModuleParrot,ModuleEchoLink')
-    el_pass = data.get('EL_Password', '')
-    
-    modules_list = [m.strip() for m in modules_str.split(',')]
-    clean_modules = []
-    
-    for m in modules_list:
-        clean_name = m
-            
-        if clean_name == "ModuleEchoLink" and not el_pass:
-            continue
-            
-        if clean_name == "MetarInfo":
-            continue
-            
-        if clean_name == "Help": clean_name = "ModuleHelp"
-        if clean_name == "Parrot": clean_name = "ModuleParrot"
-        if clean_name == "EchoLink": clean_name = "ModuleEchoLink"
-
-        clean_modules.append(clean_name)
-        
-    modules_str = ",".join(clean_modules)
+    modules_str = data.get('Modules')
+    if modules_str is not None:
+        el_pass = data.get('EL_Password', '')
+        if not el_pass:
+            modules_list = [m.strip() for m in modules_str.split(',')]
+            modules_list = [m for m in modules_list if 'EchoLink' not in m]
+            data['Modules'] = ",".join(modules_list)
 
     qth_name = data.get('qth_name', '')
     qth_city = data.get('qth_city', '')
@@ -102,6 +91,8 @@ def main():
     rx_freq = ""
     tx_freq = ""
     ctcss = "0"
+    gpio_ptt = "12"
+    gpio_sql = "16"
     
     if os.path.exists(RADIO_JSON):
         try:
@@ -110,32 +101,31 @@ def main():
                 rx_freq = rdata.get("rx", "")
                 tx_freq = rdata.get("tx", "")
                 ctcss = rdata.get("ctcss", "0")
-        except:
-            pass
+                gpio_ptt = rdata.get("gpio_ptt", "12")
+                gpio_sql = rdata.get("gpio_sql", "16")
+        except: pass
+
+
+    if 'GpioPtt' in data: gpio_ptt = data['GpioPtt']
+    if 'GpioSql' in data: gpio_sql = data['GpioSql']
 
     node_info_data = {
         "Location": qth_city,
         "Locator": qth_loc,
         "Sysop": qth_name,
-        "LAT": "0.0", 
-        "LONG": "0.0",
-        "TXFREQ": tx_freq,
-        "RXFREQ": rx_freq,
-        "CTCSS": ctcss,
+        "LAT": "0.0", "LONG": "0.0",
+        "TXFREQ": tx_freq, "RXFREQ": rx_freq, "CTCSS": ctcss,
         "DefaultTG": data.get('DefaultTG', '0'),
-        "Mode": "FM",
-        "Type": "1", 
-        "Echolink": "1" if 'ModuleEchoLink' in modules_str else "0",
+        "Mode": "FM", "Type": "1", 
+        "Echolink": "1" if data.get('Modules') and "EchoLink" in data['Modules'] else "0",
         "Website": "http://sqlink.pl",
         "LinkedTo": "SQLink"
     }
 
     try:
-        with open(NODE_INFO_FILE, 'w') as nf:
-            json.dump(node_info_data, nf, indent=4)
+        with open(NODE_INFO_FILE, 'w') as nf: json.dump(node_info_data, nf, indent=4)
         os.chmod(NODE_INFO_FILE, 0o644) 
-    except Exception as e:
-        print(f"Error writing node_info.json: {e}")
+    except Exception as e: print(f"Error writing node_info.json: {e}")
 
     loc_parts = []
     if qth_city: loc_parts.append(qth_city)
@@ -163,57 +153,46 @@ def main():
         "SimplexLogic": {
             "CALLSIGN": data.get('Callsign'),
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
-            "MODULES": modules_str
+            "MODULES": data.get('Modules')
         },
-        "ModuleHelp": {
-            "NAME": "Help",
-            "PLUGIN_NAME": "Help",
-            "ID": "0",
-            "TIMEOUT": "60"
-        },
-        "ModuleParrot": {
-            "NAME": "Parrot",
-            "PLUGIN_NAME": "Parrot",
-            "ID": "1",
-            "TIMEOUT": "60",
-            "FIFO_LEN": "60"
-        },
-        "ModuleEchoLink": {
+        "EchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),
-            "PASSWORD": el_pass,
+            "PASSWORD": data.get('EL_Password'),
             "SYSOPNAME": data.get('EL_Sysop'),
             "LOCATION": data.get('EL_Location'),
             "DESCRIPTION": data.get('EL_Desc'),
             "PROXY_SERVER": data.get('EL_ProxyHost'),
             "TIMEOUT": data.get('EL_ModTimeout'),
             "LINK_IDLE_TIMEOUT": data.get('EL_IdleTimeout')
+        },
+
+        "Rx1": {
+            "SQL_GPIOD_LINE": gpio_sql
+        },
+        "Tx1": {
+            "PTT_GPIOD_LINE": gpio_ptt
         }
     }
 
     for section, keys in mapping.items():
         for cfg_key, json_val in keys.items():
             if json_val is not None:
-                if section == "ModuleEchoLink" and cfg_key == "PROXY_SERVER" and json_val == "":
-                     lines = update_key_in_lines(lines, section, cfg_key, "")
-                else:
-                     lines = update_key_in_lines(lines, section, cfg_key, json_val)
+                lines = update_key_in_lines(lines, section, cfg_key, str(json_val))
 
     save_lines(CONFIG_FILE, lines)
 
-    radio_data = {}
-    if os.path.exists(RADIO_JSON):
-        with open(RADIO_JSON, 'r') as f:
-            try:
-                radio_data = json.load(f)
-            except:
-                pass
-
-    radio_data['qth_name'] = qth_name
-    radio_data['qth_city'] = qth_city
-    radio_data['qth_loc'] = qth_loc
-
-    with open(RADIO_JSON, 'w') as f:
-        json.dump(radio_data, f, indent=4)
+    if 'qth_name' in data: 
+        radio_data = {}
+        if os.path.exists(RADIO_JSON):
+            with open(RADIO_JSON, 'r') as f: radio_data = json.load(f)
+        
+        radio_data['qth_name'] = qth_name
+        radio_data['qth_city'] = qth_city
+        radio_data['qth_loc'] = qth_loc
+        radio_data['gpio_ptt'] = gpio_ptt
+        radio_data['gpio_sql'] = gpio_sql
+        
+        with open(RADIO_JSON, 'w') as f: json.dump(radio_data, f, indent=4)
 
     print("SUKCES")
 
