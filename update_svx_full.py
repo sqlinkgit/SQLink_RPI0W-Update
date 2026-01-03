@@ -18,15 +18,11 @@ def save_lines(path, lines):
 def update_key_in_lines(lines, section, key, value):
     new_lines = []
     in_section = False
-    key_found = False
+    key_updated = False
     
     section_header = f"[{section}]"
-    section_exists = False
-    for line in lines:
-        if line.strip() == section_header:
-            section_exists = True
-            break
-            
+    
+    section_exists = any(line.strip() == section_header for line in lines)
     if not section_exists:
         lines.append(f"\n{section_header}\n")
 
@@ -38,14 +34,18 @@ def update_key_in_lines(lines, section, key, value):
         if in_section and "=" in stripped and not stripped.startswith(("#", ";")):
             parts = stripped.split("=", 1)
             current_key = parts[0].strip()
+            
             if current_key == key:
-                new_lines.append(f"{key}={value}\n")
-                key_found = True
+                if not key_updated:
+                    new_lines.append(f"{key}={value}\n")
+                    key_updated = True
+                else:
+                    pass 
                 continue 
 
         new_lines.append(line)
 
-    if not key_found:
+    if not key_updated:
         final_lines = []
         in_tgt_sec = False
         added = False
@@ -64,8 +64,6 @@ def update_key_in_lines(lines, section, key, value):
         if in_tgt_sec and not added:
              final_lines.append(f"{key}={value}\n")
              added = True
-        if not added:
-             final_lines.append(f"{key}={value}\n")
         return final_lines
 
     return new_lines
@@ -105,7 +103,6 @@ def main():
                 gpio_sql = rdata.get("gpio_sql", "16")
         except: pass
 
-
     if 'GpioPtt' in data: gpio_ptt = data['GpioPtt']
     if 'GpioSql' in data: gpio_sql = data['GpioSql']
 
@@ -133,9 +130,17 @@ def main():
     if qth_name: loc_parts.append(f"(Op: {qth_name})")
     location_str = ", ".join(loc_parts)
 
+    main_callsign = data.get('Callsign', '')
+    voice_id_switch = data.get('VoiceID', '1')
+
+    if voice_id_switch == "0":
+        simplex_callsign = ""
+    else:
+        simplex_callsign = main_callsign
+
     mapping = {
         "ReflectorLogic": {
-            "CALLSIGN": data.get('Callsign'),
+            "CALLSIGN": main_callsign,
             "AUTH_KEY": data.get('Password'),
             "HOSTS": data.get('Host'),
             "HOST_PORT": data.get('Port'),
@@ -151,9 +156,11 @@ def main():
             "NODE_INFO_FILE": NODE_INFO_FILE
         },
         "SimplexLogic": {
-            "CALLSIGN": data.get('Callsign'),
+            "CALLSIGN": simplex_callsign,
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
-            "MODULES": data.get('Modules')
+            "MODULES": data.get('Modules'),
+            "SHORT_IDENT_INTERVAL": "10",
+            "LONG_IDENT_INTERVAL": "60"
         },
         "EchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),
@@ -165,13 +172,8 @@ def main():
             "TIMEOUT": data.get('EL_ModTimeout'),
             "LINK_IDLE_TIMEOUT": data.get('EL_IdleTimeout')
         },
-
-        "Rx1": {
-            "SQL_GPIOD_LINE": gpio_sql
-        },
-        "Tx1": {
-            "PTT_GPIOD_LINE": gpio_ptt
-        }
+        "Rx1": { "SQL_GPIOD_LINE": gpio_sql },
+        "Tx1": { "PTT_GPIOD_LINE": gpio_ptt }
     }
 
     for section, keys in mapping.items():
@@ -185,13 +187,11 @@ def main():
         radio_data = {}
         if os.path.exists(RADIO_JSON):
             with open(RADIO_JSON, 'r') as f: radio_data = json.load(f)
-        
         radio_data['qth_name'] = qth_name
         radio_data['qth_city'] = qth_city
         radio_data['qth_loc'] = qth_loc
         radio_data['gpio_ptt'] = gpio_ptt
         radio_data['gpio_sql'] = gpio_sql
-        
         with open(RADIO_JSON, 'w') as f: json.dump(radio_data, f, indent=4)
 
     print("SUKCES")

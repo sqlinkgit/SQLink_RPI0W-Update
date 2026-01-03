@@ -98,12 +98,16 @@
     $rx1 = $ini['Rx1'] ?? [];
     $tx1 = $ini['Tx1'] ?? [];
 
+    $currentSimplexCall = $simp['CALLSIGN'] ?? '';
+    $voiceIDStatus = ($currentSimplexCall == '') ? '0' : '1';
+
     $vals = [
         'Callsign' => $ref['CALLSIGN'] ?? 'N0CALL', 'Host' => $ref['HOSTS'] ?? '', 'Port' => $ref['HOST_PORT'] ?? '', 'Password' => $ref['AUTH_KEY'] ?? '',
         'DefaultTG' => $ref['DEFAULT_TG'] ?? '0', 'MonitorTGs' => $ref['MONITOR_TGS'] ?? '', 'TgTimeout' => $ref['TG_SELECT_TIMEOUT'] ?? '60',
         'TmpTimeout' => $ref['TMP_MONITOR_TIMEOUT'] ?? '3600', 'Modules' => $simp['MODULES'] ?? 'Help,Parrot,EchoLink',
         'Beep3Tone' => $ref['TGSTBEEP_ENABLE'] ?? '0', 'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0', 'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0',
         'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
+        'VoiceID'   => $voiceIDStatus,
     ];
     $vals_el = [
         'Callsign' => $el['CALLSIGN'] ?? $vals['Callsign'], 'Password' => $el['PASSWORD'] ?? '', 'Sysop' => $el['SYSOPNAME'] ?? '',

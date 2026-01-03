@@ -94,7 +94,7 @@ h1 {
 
 .dtmf-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .panel-box { background: #252525; padding: 15px; border-radius: 5px; border: 1px solid #333; margin-bottom: 20px; }
-.panel-title { color: #4CAF50; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0; font-size: 16px; }
+.panel-title { color: #4CAF50; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0; font-size: 16px; margin-bottom: 10px; }
 .panel-title.blue { color: #2196F3; }
 .panel-title.green { color: #4CAF50; }
 .macro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
@@ -214,8 +214,6 @@ input[type=checkbox] { transform: scale(1.3); accent-color: #4CAF50; cursor: poi
     .live-callsign { font-size: 28px; }
     .live-box { height: auto; padding: 15px; }
     .log-box { font-size: 10px; height: 300px; }
-    
-
     .form-grid-layout { display: flex; flex-direction: column; gap: 10px; }
 }
 
@@ -236,6 +234,28 @@ input[type=checkbox] { transform: scale(1.3); accent-color: #4CAF50; cursor: poi
 .form-group { margin-bottom: 15px; }
 label { display: block; margin-bottom: 5px; font-size: 13px; color: #bbb; font-weight: bold; }
 input[type="text"], input[type="password"], input[type="number"], select { width: 100%; padding: 10px; background: #2c2c2c; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
+
+.compact-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.compact-row label {
+    margin-bottom: 0;
+    flex: 0 0 130px; 
+    text-align: left;
+    font-size: 12px;
+}
+
+.compact-row input, .compact-row select {
+    flex: 1;
+    padding: 6px;
+    height: 32px;
+    font-size: 13px;
+}
 
 .mod-btn {
     background: #444; 
