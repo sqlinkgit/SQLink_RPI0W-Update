@@ -143,7 +143,7 @@
         ];
         file_put_contents($jsonFile, json_encode($newRadio));
         $radio = $newRadio;
-
+        
         $hwUpdate = ["GpioPtt"=>$_POST['gpio_ptt'], "GpioSql"=>$_POST['gpio_sql']];
         file_put_contents('/tmp/svx_new_settings.json', json_encode($hwUpdate));
         shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1');
@@ -223,9 +223,29 @@
     if (isset($_POST['wifi_delete'])) { $ssid = escapeshellarg($_POST['ssid']); $wifi_output = shell_exec("sudo nmcli connection delete $ssid 2>&1"); echo "<div class='alert alert-warning'>Usunięto sieć.</div><meta http-equiv='refresh' content='2'>"; }
     
     $cache_file = '/tmp/sqlink_alert_cache.txt';
-    $cache_time = 3600; $alert_msg = "";
-    if (file_exists($cache_file) && (time() - filemtime($cache_file) < $cache_time)) { $alert_msg = file_get_contents($cache_file); }
-    else { $ctx = stream_context_create(['http' => ['timeout' => 5]]); $remote_msg = @file_get_contents('https://raw.githubusercontent.com/SQLinkgit/SQLink_RPI0W-Update/main/alert.txt', false, $ctx); if ($remote_msg !== false) { $alert_msg = $remote_msg; file_put_contents($cache_file, $alert_msg); } elseif (file_exists($cache_file)) { $alert_msg = file_get_contents($cache_file); } }
+    $cache_time = 3600; 
+    $alert_msg = "";
+    
+    if (file_exists($cache_file) && (time() - filemtime($cache_file) < $cache_time)) { 
+        $alert_msg = file_get_contents($cache_file); 
+    } else { 
+        $opts = [
+            "http" => [
+                "method" => "GET",
+                "header" => "User-Agent: SQLink-Hotspot\r\n",
+                "timeout" => 5
+            ]
+        ];
+        $ctx = stream_context_create($opts);
+        $remote_msg = @file_get_contents('https://raw.githubusercontent.com/SQLinkgit/SQLink_RPI0W-Update/main/alert.txt', false, $ctx); 
+        
+        if ($remote_msg !== false) { 
+            $alert_msg = $remote_msg; 
+            file_put_contents($cache_file, $alert_msg); 
+        } elseif (file_exists($cache_file)) { 
+            $alert_msg = file_get_contents($cache_file); 
+        } 
+    }
 ?>
 <!DOCTYPE html>
 <html lang="pl">
