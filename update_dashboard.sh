@@ -114,6 +114,23 @@ if [ -f "$SVX_CONF" ]; then
     fi
 fi
 
+# --- WATCHDOG: AUTOMATYCZNA NAPRAWA PROXY ---
+cat <<EOF > /usr/local/bin/proxy_watchdog.sh
+#!/bin/bash
+# Sprawdza czy występuje błąd proxy (czerwona kropka na dashboardzie)
+# Jeśli tak -> uruchamia auto_proxy.py
+if [ -f "/var/www/html/el_error.flag" ]; then
+    echo "\$(date): WATCHDOG - Wykryto awarię Proxy (el_error.flag). Uruchamiam naprawę..." >> /var/log/svxlink_watchdog.log
+    /usr/bin/python3 /usr/local/bin/auto_proxy.py >> /var/log/svxlink_watchdog.log 2>&1
+fi
+EOF
+chmod +x /usr/local/bin/proxy_watchdog.sh
+
+
+CRON_CMD="*/5 * * * * /usr/local/bin/proxy_watchdog.sh"
+(crontab -l 2>/dev/null | grep -v "proxy_watchdog.sh"; echo "$CRON_CMD") | crontab -
+
+
 cat <<EOF > /usr/local/bin/clean_logs_on_boot.sh
 #!/bin/bash
 LOG_FILE="/var/log/svxlink"
@@ -171,8 +188,6 @@ tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
             ;;
         *"EchoLink directory status changed to"*"OFF"*|*"Disconnected from EchoLink proxy"*)
             rm -f "\$FLAG_ONLINE"
-            touch "\$FLAG_ERROR"
-            chown www-data:www-data "\$FLAG_ERROR"
             ;;
         *"EchoLink authentication failed"*|*"Connection failed"*)
             rm -f "\$FLAG_ONLINE"
