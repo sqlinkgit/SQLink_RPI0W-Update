@@ -12,7 +12,6 @@ date
 OLD_HASH=""
 NEW_HASH=""
 
-
 if [ ! -d "$GIT_DIR" ]; then
     cd /root
     git clone $GIT_URL
@@ -37,7 +36,6 @@ else
     fi
 fi
 
-
 SCRIPT_PATH="/usr/local/bin/update_dashboard.sh"
 REPO_SCRIPT="$GIT_DIR/update_dashboard.sh"
 
@@ -50,7 +48,6 @@ if [ -f "$SCRIPT_PATH" ] && [ -f "$REPO_SCRIPT" ]; then
         exit 0
     fi
 fi
-
 
 if [ -d "$GIT_DIR/PL" ]; then
     if [ -d "$SOUNDS_DIR/pl_PL" ]; then
@@ -77,7 +74,6 @@ if [ -d "$GIT_DIR/PL" ]; then
     fi
 fi
 
-
 cp $GIT_DIR/*.css $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.png $WWW_DIR/ 2>/dev/null
@@ -92,14 +88,11 @@ if compgen -G "$GIT_DIR/*.py" > /dev/null; then
     chmod +x /usr/local/bin/*.py
 fi
 
-
 if [ -f "$GIT_DIR/auto_proxy.py" ]; then
     echo "Updating auto_proxy.py..."
     cp "$GIT_DIR/auto_proxy.py" /usr/local/bin/
     chmod +x /usr/local/bin/auto_proxy.py
 fi
-
-
 
 for script in $GIT_DIR/*.sh; do
     filename=$(basename "$script")
@@ -112,17 +105,11 @@ done
 chown -R www-data:www-data $WWW_DIR
 chmod -R 755 $WWW_DIR
 
-
 if [ -f "$SVX_CONF" ]; then
-
     if grep -q "^\[EchoLink\]" "$SVX_CONF"; then
         echo "Cleaning up duplicate [EchoLink] section from config..."
-        
-
         cp "$SVX_CONF" "${SVX_CONF}.bak_update"
-
         sed -i '/^\[EchoLink\]$/,/^\[/ { /^\[EchoLink\]$/d; /^\[/!d; }' "$SVX_CONF"
-        
         echo "Cleanup complete."
     fi
 fi
@@ -176,7 +163,7 @@ tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
     fi
 
     case "\$line" in
-        *"EchoLink directory status changed to ON"*|*"Connected to EchoLink proxy"*|*"ModuleEchoLink: Connected to"*)
+        *"EchoLink directory status changed to ON"*|*"ModuleEchoLink: Connected to"*)
             touch "\$FLAG_ONLINE"
             rm -f "\$FLAG_ERROR"
             chown www-data:www-data "\$FLAG_ONLINE"
