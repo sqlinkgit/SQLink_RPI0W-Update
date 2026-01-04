@@ -131,16 +131,22 @@ def main():
     location_str = ", ".join(loc_parts)
 
     main_callsign = data.get('Callsign', '')
-    voice_id_switch = data.get('VoiceID', '1')
-
-    if voice_id_switch == "0":
-        simplex_callsign = ""
-    else:
+    announce_call = data.get('AnnounceCall', '1')
+    
+    reflector_callsign = main_callsign
+    
+    if announce_call == "1":
         simplex_callsign = main_callsign
+        short_ident = "10"
+        long_ident = "60"
+    else:
+        simplex_callsign = "" 
+        short_ident = "0"
+        long_ident = "0"
 
     mapping = {
         "ReflectorLogic": {
-            "CALLSIGN": main_callsign,
+            "CALLSIGN": reflector_callsign,
             "AUTH_KEY": data.get('Password'),
             "HOSTS": data.get('Host'),
             "HOST_PORT": data.get('Port'),
@@ -159,8 +165,8 @@ def main():
             "CALLSIGN": simplex_callsign,
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
             "MODULES": data.get('Modules'),
-            "SHORT_IDENT_INTERVAL": "10",
-            "LONG_IDENT_INTERVAL": "60"
+            "SHORT_IDENT_INTERVAL": short_ident,
+            "LONG_IDENT_INTERVAL": long_ident
         },
         "EchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),

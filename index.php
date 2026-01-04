@@ -100,6 +100,8 @@
 
     $currentSimplexCall = $simp['CALLSIGN'] ?? '';
     $voiceIDStatus = ($currentSimplexCall == '') ? '0' : '1';
+    $simplex_call_val = $simp['CALLSIGN'] ?? '';
+    $announce_status = (!empty($simplex_call_val) && $simplex_call_val !== '""') ? '1' : '0';
 
     $vals = [
         'Callsign' => $ref['CALLSIGN'] ?? 'N0CALL', 'Host' => $ref['HOSTS'] ?? '', 'Port' => $ref['HOST_PORT'] ?? '', 'Password' => $ref['AUTH_KEY'] ?? '',
@@ -108,6 +110,7 @@
         'Beep3Tone' => $ref['TGSTBEEP_ENABLE'] ?? '0', 'AnnounceTG' => $ref['TGREANON_ENABLE'] ?? '0', 'RefStatusInfo' => $ref['REFCON_ENABLE'] ?? '0',
         'RogerBeep' => $simp['RGR_SOUND_ALWAYS'] ?? '0',
         'VoiceID'   => $voiceIDStatus,
+        'AnnounceCall' => $announce_status,
     ];
     $vals_el = [
         'Callsign' => $el['CALLSIGN'] ?? $vals['Callsign'], 'Password' => $el['PASSWORD'] ?? '', 'Sysop' => $el['SYSOPNAME'] ?? '',
