@@ -140,16 +140,24 @@
     }
 
     if (isset($_POST['save_radio'])) {
-        $newRadio = [
-            "rx" => $_POST['rx_freq'], 
-            "tx" => $_POST['tx_freq'], 
-            "ctcss" => $_POST['ctcss_val'],
-            "desc" => $_POST['radio_desc'],
-            "gpio_ptt" => $_POST['gpio_ptt'],
-            "gpio_sql" => $_POST['gpio_sql']
-        ];
-        file_put_contents($jsonFile, json_encode($newRadio));
-        $radio = $newRadio;
+        $currentConfig = [];
+        if (file_exists($jsonFile)) {
+            $decoded = json_decode(file_get_contents($jsonFile), true);
+            if (is_array($decoded)) {
+                $currentConfig = $decoded;
+            }
+        }
+
+        $currentConfig['rx'] = $_POST['rx_freq'];
+        $currentConfig['tx'] = $_POST['tx_freq'];
+        $currentConfig['ctcss'] = $_POST['ctcss_val'];
+        $currentConfig['desc'] = $_POST['radio_desc'];
+        $currentConfig['gpio_ptt'] = $_POST['gpio_ptt'];
+        $currentConfig['gpio_sql'] = $_POST['gpio_sql'];
+
+        file_put_contents($jsonFile, json_encode($currentConfig));
+        
+        $radio = $currentConfig;
         
         $hwUpdate = ["GpioPtt"=>$_POST['gpio_ptt'], "GpioSql"=>$_POST['gpio_sql']];
         file_put_contents('/tmp/svx_new_settings.json', json_encode($hwUpdate));
