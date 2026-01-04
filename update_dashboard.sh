@@ -171,6 +171,8 @@ tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
             ;;
         *"EchoLink directory status changed to"*"OFF"*|*"Disconnected from EchoLink proxy"*)
             rm -f "\$FLAG_ONLINE"
+            touch "\$FLAG_ERROR"
+            chown www-data:www-data "\$FLAG_ERROR"
             ;;
         *"EchoLink authentication failed"*|*"Connection failed"*)
             rm -f "\$FLAG_ONLINE"
