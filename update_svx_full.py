@@ -82,10 +82,6 @@ def main():
             modules_list = [m for m in modules_list if 'EchoLink' not in m]
             data['Modules'] = ",".join(modules_list)
 
-    qth_name = data.get('qth_name', '')
-    qth_city = data.get('qth_city', '')
-    qth_loc = data.get('qth_loc', '')
-
     rx_freq = ""
     tx_freq = ""
     ctcss = "0"
@@ -106,12 +102,21 @@ def main():
     if 'GpioPtt' in data: gpio_ptt = data['GpioPtt']
     if 'GpioSql' in data: gpio_sql = data['GpioSql']
 
+    qth_name = data.get('qth_name')
+    qth_city = data.get('qth_city')
+    qth_loc = data.get('qth_loc')
 
-    if 'Callsign' in data:
+    location_conf_val = None
+
+    if qth_city is not None:
+        s_name = qth_name if qth_name else ""
+        s_city = qth_city if qth_city else ""
+        s_loc = qth_loc if qth_loc else ""
+
         node_info_data = {
-            "Location": qth_city,
-            "Locator": qth_loc,
-            "Sysop": qth_name,
+            "Location": s_city,
+            "Locator": s_loc,
+            "Sysop": s_name,
             "LAT": "0.0", "LONG": "0.0",
             "TXFREQ": tx_freq, "RXFREQ": rx_freq, "CTCSS": ctcss,
             "DefaultTG": data.get('DefaultTG', '0'),
@@ -126,11 +131,11 @@ def main():
             os.chmod(NODE_INFO_FILE, 0o644) 
         except Exception as e: print(f"Error writing node_info.json: {e}")
 
-    loc_parts = []
-    if qth_city: loc_parts.append(qth_city)
-    if qth_loc: loc_parts.append(qth_loc)
-    if qth_name: loc_parts.append(f"(Op: {qth_name})")
-    location_str = ", ".join(loc_parts)
+        loc_parts = []
+        if s_city: loc_parts.append(s_city)
+        if s_loc: loc_parts.append(s_loc)
+        if s_name: loc_parts.append(f"(Op: {s_name})")
+        location_conf_val = f'"{", ".join(loc_parts)}"'
 
     main_callsign = data.get('Callsign')
     announce_call = data.get('AnnounceCall', '1')
@@ -152,7 +157,6 @@ def main():
             short_ident = "0"
             long_ident = "0"
 
-
     mapping = {
         "ReflectorLogic": {
             "CALLSIGN": reflector_callsign,
@@ -167,7 +171,7 @@ def main():
             "TGREANON_ENABLE": data.get('AnnounceTG'),
             "REFCON_ENABLE": data.get('RefStatusInfo'),
             "UDP_HEARTBEAT_INTERVAL": "15",
-            "LOCATION": f'"{location_str}"' if qth_city else None,
+            "LOCATION": location_conf_val,
             "NODE_INFO_FILE": NODE_INFO_FILE
         },
         "SimplexLogic": {
@@ -202,9 +206,9 @@ def main():
         radio_data = {}
         if os.path.exists(RADIO_JSON):
             with open(RADIO_JSON, 'r') as f: radio_data = json.load(f)
-        radio_data['qth_name'] = qth_name
-        radio_data['qth_city'] = qth_city
-        radio_data['qth_loc'] = qth_loc
+        radio_data['qth_name'] = qth_name if qth_name else ""
+        radio_data['qth_city'] = qth_city if qth_city else ""
+        radio_data['qth_loc'] = qth_loc if qth_loc else ""
         radio_data['gpio_ptt'] = gpio_ptt
         radio_data['gpio_sql'] = gpio_sql
         with open(RADIO_JSON, 'w') as f: json.dump(radio_data, f, indent=4)
