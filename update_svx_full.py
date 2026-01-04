@@ -190,7 +190,7 @@ def main():
             "SHORT_IDENT_INTERVAL": short_ident,
             "LONG_IDENT_INTERVAL": long_ident
         },
-        "EchoLink": {
+        "ModuleEchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),
             "PASSWORD": data.get('EL_Password'),
             "SYSOPNAME": data.get('EL_Sysop'),

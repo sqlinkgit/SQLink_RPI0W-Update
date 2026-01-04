@@ -93,7 +93,7 @@
         return $ini;
     }
     $ini = parse_svx_conf('/etc/svxlink/svxlink.conf');
-    $ref = $ini['ReflectorLogic'] ?? []; $simp = $ini['SimplexLogic'] ?? []; $glob = $ini['GLOBAL'] ?? []; $el = $ini['EchoLink'] ?? [];
+    $ref = $ini['ReflectorLogic'] ?? []; $simp = $ini['SimplexLogic'] ?? []; $glob = $ini['GLOBAL'] ?? []; $el = $ini['ModuleEchoLink'] ?? [];
     
     $rx1 = $ini['Rx1'] ?? [];
     $tx1 = $ini['Tx1'] ?? [];
