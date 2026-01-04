@@ -137,7 +137,7 @@ def main():
     
     if announce_call == "1":
         simplex_callsign = main_callsign
-        short_ident = "10"
+        short_ident = "60"
         long_ident = "60"
     else:
         simplex_callsign = "" 

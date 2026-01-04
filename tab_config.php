@@ -72,7 +72,7 @@
                 <div class="form-group"><label>Zapowiedź TG</label><select name="AnnounceTG"><option value="1" <?php if($vals['AnnounceTG']=='1') echo 'selected'; ?>>TAK</option><option value="0" <?php if($vals['AnnounceTG']=='0') echo 'selected'; ?>>NIE</option></select></div>
                 <div class="form-group"><label>Info Link</label><select name="RefStatusInfo"><option value="1" <?php if($vals['RefStatusInfo']=='1') echo 'selected'; ?>>TAK</option><option value="0" <?php if($vals['RefStatusInfo']=='0') echo 'selected'; ?>>NIE</option></select></div>
                 <div class="form-group"><label>Roger Beep</label><select name="RogerBeep"><option value="1" <?php if($vals['RogerBeep']=='1') echo 'selected'; ?>>TAK</option><option value="0" <?php if($vals['RogerBeep']=='0') echo 'selected'; ?>>NIE</option></select></div>
-                <div class="form-group"><label>Mówienie Znaku</label><select name="AnnounceCall"><option value="1" <?php if(isset($vals['AnnounceCall']) && $vals['AnnounceCall']=='1') echo 'selected'; ?>>TAK</option><option value="0" <?php if(isset($vals['AnnounceCall']) && $vals['AnnounceCall']=='0') echo 'selected'; ?>>NIE</option></select></div>
+                <div class="form-group"><label>Recytowanie Znaku</label><select name="AnnounceCall"><option value="1" <?php if(isset($vals['AnnounceCall']) && $vals['AnnounceCall']=='1') echo 'selected'; ?>>TAK</option><option value="0" <?php if(isset($vals['AnnounceCall']) && $vals['AnnounceCall']=='0') echo 'selected'; ?>>NIE</option></select></div>
             </div>
         </div>
     </div>
