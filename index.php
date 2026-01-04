@@ -347,7 +347,7 @@
     <div class="info-panel">
         <div class="info-box">
             <div class="info-label">Logiki</div>
-            <div class="info-value" style="color:#4CAF50;">SimplexLogic<br>ReflectorLogic</div>
+            <div class="info-value" style="color:#fff; font-size:11px; line-height:1.4;">SimplexLogic<br>ReflectorLogic</div>
         </div>
         <div class="info-box">
             <div class="info-label">Moduły</div>
