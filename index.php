@@ -177,8 +177,8 @@
     
     // --- POPRAWKA: Użycie proxy_hunter.py ---
     if (isset($_POST['auto_proxy'])) { 
-        if (file_exists('/usr/local/bin/proxy_hunter.py')) {
-             shell_exec('sudo /usr/bin/python3 /usr/local/bin/proxy_hunter.py > /dev/null 2>&1 &');
+        if (file_exists('/usr/local/bin/auto_proxy.py')) {
+     shell_exec('sudo /usr/bin/python3 /usr/local/bin/auto_proxy.py > /dev/null 2>&1 &');
              echo "<div class='alert alert-warning'>♻️ Uruchomiono Proxy Hunter (Szukam najlepszego serwera... Czekaj).</div><meta http-equiv='refresh' content='8'>";
         } else {
              echo "<div class='alert alert-error'>Brak pliku proxy_hunter.py w /usr/local/bin!</div>";
