@@ -152,14 +152,18 @@
         $currentConfig['tx'] = $_POST['tx_freq'];
         $currentConfig['ctcss'] = $_POST['ctcss_val'];
         $currentConfig['desc'] = $_POST['radio_desc'];
-        $currentConfig['gpio_ptt'] = $_POST['gpio_ptt'];
-        $currentConfig['gpio_sql'] = $_POST['gpio_sql'];
+
+        $new_ptt = $_POST['gpio_ptt'] ?? '12';
+        $new_sql = $_POST['gpio_sql'] ?? '16';
+        
+        $currentConfig['gpio_ptt'] = $new_ptt;
+        $currentConfig['gpio_sql'] = $new_sql;
 
         file_put_contents($jsonFile, json_encode($currentConfig));
         
         $radio = $currentConfig;
-        
-        $hwUpdate = ["GpioPtt"=>$_POST['gpio_ptt'], "GpioSql"=>$_POST['gpio_sql']];
+
+        $hwUpdate = ["GpioPtt" => $new_ptt, "GpioSql" => $new_sql];
         file_put_contents('/tmp/svx_new_settings.json', json_encode($hwUpdate));
         shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1');
         
@@ -170,10 +174,11 @@
     if (isset($_POST['restart_srv'])) { shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &'); echo "<div class='alert alert-success'>Restart Usługi...</div>"; }
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
+
     if (isset($_POST['auto_proxy'])) { 
         if (file_exists('/usr/local/bin/auto_proxy.py')) {
              shell_exec('sudo /usr/bin/python3 /usr/local/bin/auto_proxy.py > /dev/null 2>&1 &');
-             echo "<div class='alert alert-warning'>♻️ Uruchomiono Auto-Proxy.</div>";
+             echo "<div class='alert alert-warning'>♻️ Uruchomiono Auto-Proxy (Czekaj na restart...).</div><meta http-equiv='refresh' content='5'>";
         }
     }
     
