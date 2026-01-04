@@ -160,11 +160,37 @@ cat <<EOF > /usr/local/bin/svx_event_logger.sh
 #!/bin/bash
 LOG_SOURCE="/var/log/svxlink"
 LOG_DEST="/var/www/html/svx_events.log"
+FLAG_ONLINE="/var/www/html/el_online.flag"
+FLAG_ERROR="/var/www/html/el_error.flag"
+
 pkill -f "tail -F -n +1 \$LOG_SOURCE"
+
 touch \$LOG_DEST
 chown www-data:www-data \$LOG_DEST
 chmod 644 \$LOG_DEST
-tail -F -n +1 "\$LOG_SOURCE" | grep --line-buffered -E "ReflectorLogic: Connection established|ReflectorLogic: Disconnected|ReflectorLogic: Authentication failed|ReflectorLogic: Selecting TG|ReflectorLogic: Heartbeat timeout|Node joined|Node left|Talker start|Talker stop|Connected nodes|Distortion|Clipping|Underrun|Tx1: Turning the transmitter|Rx1: The squelch|EchoLink directory status changed|Connected to EchoLink proxy|Disconnected from EchoLink proxy|ModuleEchoLink: Connected to|ModuleEchoLink: Disconnected" >> "\$LOG_DEST" &
+
+tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
+    
+    if echo "\$line" | grep -qE "ReflectorLogic|EchoLink|Tx1|Rx1|Node|Talker|Underrun|Clipping|Distortion|ModuleEchoLink"; then
+        echo "\$line" >> "\$LOG_DEST"
+    fi
+
+    case "\$line" in
+        *"EchoLink directory status changed to ON"*|*"Connected to EchoLink proxy"*|*"ModuleEchoLink: Connected to"*)
+            touch "\$FLAG_ONLINE"
+            rm -f "\$FLAG_ERROR"
+            chown www-data:www-data "\$FLAG_ONLINE"
+            ;;
+        *"EchoLink directory status changed to"*"OFF"*|*"Disconnected from EchoLink proxy"*)
+            rm -f "\$FLAG_ONLINE"
+            ;;
+        *"EchoLink authentication failed"*|*"Connection failed"*)
+            rm -f "\$FLAG_ONLINE"
+            touch "\$FLAG_ERROR"
+            chown www-data:www-data "\$FLAG_ERROR"
+            ;;
+    esac
+done &
 EOF
 chmod +x /usr/local/bin/svx_event_logger.sh
 
