@@ -5,6 +5,17 @@ $radio_display = [
     "gpio_ptt" => "12", "gpio_sql" => "16"
 ];
 
+$CTCSS_TONES = [
+    "0000" => "Brak (CSQ)", "0670" => "67.0 Hz", "0719" => "71.9 Hz", "0744" => "74.4 Hz", "0770" => "77.0 Hz",
+    "0797" => "79.7 Hz", "0825" => "82.5 Hz", "0854" => "85.4 Hz", "0885" => "88.5 Hz", "0915" => "91.5 Hz",
+    "0948" => "94.8 Hz", "0974" => "97.4 Hz", "1000" => "100.0 Hz", "1035" => "103.5 Hz", "1072" => "107.2 Hz",
+    "1109" => "110.9 Hz", "1148" => "114.8 Hz", "1188" => "118.8 Hz", "1230" => "123.0 Hz", "1273" => "127.3 Hz",
+    "1318" => "131.8 Hz", "1365" => "136.5 Hz", "1413" => "141.3 Hz", "1462" => "146.2 Hz", "1514" => "151.4 Hz",
+    "1567" => "156.7 Hz", "1622" => "162.2 Hz", "1679" => "167.9 Hz", "1738" => "173.8 Hz", "1799" => "179.9 Hz",
+    "1862" => "186.2 Hz", "1928" => "192.8 Hz", "2035" => "203.5 Hz", "2107" => "210.7 Hz", "2181" => "218.1 Hz",
+    "2257" => "225.7 Hz", "2336" => "233.6 Hz", "2418" => "241.8 Hz", "2503" => "250.3 Hz"
+];
+
 if (file_exists($jsonFile)) {
     $loaded = json_decode(file_get_contents($jsonFile), true);
     if ($loaded) {
@@ -25,7 +36,7 @@ if (file_exists($jsonFile)) {
                 <label>Opis Sprzętu</label>
                 <input type="text" name="radio_desc" value="<?php echo htmlspecialchars($radio_display['desc']); ?>" placeholder="np. Motorola GM360">
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                 <div class="form-group">
                     <label>RX Freq (MHz)</label>
                     <input type="text" name="rx_freq" value="<?php echo htmlspecialchars($radio_display['rx']); ?>">
@@ -33,6 +44,16 @@ if (file_exists($jsonFile)) {
                 <div class="form-group">
                     <label>TX Freq (MHz)</label>
                     <input type="text" name="tx_freq" value="<?php echo htmlspecialchars($radio_display['tx']); ?>">
+                </div>
+                <div class="form-group">
+                    <label>CTCSS (Info)</label>
+                    <select name="ctcss_val">
+                        <?php foreach($CTCSS_TONES as $code => $label): ?>
+                            <option value="<?php echo $code; ?>" <?php if(isset($radio_display['ctcss']) && $radio_display['ctcss'] == $code) echo 'selected'; ?>>
+                                <?php echo $label; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
             

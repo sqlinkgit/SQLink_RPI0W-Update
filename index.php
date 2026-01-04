@@ -143,7 +143,7 @@
         $newRadio = [
             "rx" => $_POST['rx_freq'], 
             "tx" => $_POST['tx_freq'], 
-            "ctcss" => "0000",
+            "ctcss" => $_POST['ctcss_val'],
             "desc" => $_POST['radio_desc'],
             "gpio_ptt" => $_POST['gpio_ptt'],
             "gpio_sql" => $_POST['gpio_sql']
