@@ -106,23 +106,25 @@ def main():
     if 'GpioPtt' in data: gpio_ptt = data['GpioPtt']
     if 'GpioSql' in data: gpio_sql = data['GpioSql']
 
-    node_info_data = {
-        "Location": qth_city,
-        "Locator": qth_loc,
-        "Sysop": qth_name,
-        "LAT": "0.0", "LONG": "0.0",
-        "TXFREQ": tx_freq, "RXFREQ": rx_freq, "CTCSS": ctcss,
-        "DefaultTG": data.get('DefaultTG', '0'),
-        "Mode": "FM", "Type": "1", 
-        "Echolink": "1" if data.get('Modules') and "EchoLink" in data['Modules'] else "0",
-        "Website": "http://sqlink.pl",
-        "LinkedTo": "SQLink"
-    }
 
-    try:
-        with open(NODE_INFO_FILE, 'w') as nf: json.dump(node_info_data, nf, indent=4)
-        os.chmod(NODE_INFO_FILE, 0o644) 
-    except Exception as e: print(f"Error writing node_info.json: {e}")
+    if 'Callsign' in data:
+        node_info_data = {
+            "Location": qth_city,
+            "Locator": qth_loc,
+            "Sysop": qth_name,
+            "LAT": "0.0", "LONG": "0.0",
+            "TXFREQ": tx_freq, "RXFREQ": rx_freq, "CTCSS": ctcss,
+            "DefaultTG": data.get('DefaultTG', '0'),
+            "Mode": "FM", "Type": "1", 
+            "Echolink": "1" if data.get('Modules') and "EchoLink" in data['Modules'] else "0",
+            "Website": "http://sqlink.pl",
+            "LinkedTo": "SQLink"
+        }
+
+        try:
+            with open(NODE_INFO_FILE, 'w') as nf: json.dump(node_info_data, nf, indent=4)
+            os.chmod(NODE_INFO_FILE, 0o644) 
+        except Exception as e: print(f"Error writing node_info.json: {e}")
 
     loc_parts = []
     if qth_city: loc_parts.append(qth_city)
@@ -130,19 +132,26 @@ def main():
     if qth_name: loc_parts.append(f"(Op: {qth_name})")
     location_str = ", ".join(loc_parts)
 
-    main_callsign = data.get('Callsign', '')
+    main_callsign = data.get('Callsign')
     announce_call = data.get('AnnounceCall', '1')
     
-    reflector_callsign = main_callsign
-    
-    if announce_call == "1":
-        simplex_callsign = main_callsign
-        short_ident = "60"
-        long_ident = "60"
-    else:
-        simplex_callsign = "" 
-        short_ident = "0"
-        long_ident = "0"
+    reflector_callsign = None
+    simplex_callsign = None
+    short_ident = None
+    long_ident = None
+
+    if main_callsign is not None:
+        reflector_callsign = main_callsign
+        
+        if announce_call == "1":
+            simplex_callsign = main_callsign
+            short_ident = "60"
+            long_ident = "60"
+        else:
+            simplex_callsign = ""
+            short_ident = "0"
+            long_ident = "0"
+
 
     mapping = {
         "ReflectorLogic": {
@@ -158,7 +167,7 @@ def main():
             "TGREANON_ENABLE": data.get('AnnounceTG'),
             "REFCON_ENABLE": data.get('RefStatusInfo'),
             "UDP_HEARTBEAT_INTERVAL": "15",
-            "LOCATION": f'"{location_str}"',
+            "LOCATION": f'"{location_str}"' if qth_city else None,
             "NODE_INFO_FILE": NODE_INFO_FILE
         },
         "SimplexLogic": {
@@ -196,6 +205,14 @@ def main():
         radio_data['qth_name'] = qth_name
         radio_data['qth_city'] = qth_city
         radio_data['qth_loc'] = qth_loc
+        radio_data['gpio_ptt'] = gpio_ptt
+        radio_data['gpio_sql'] = gpio_sql
+        with open(RADIO_JSON, 'w') as f: json.dump(radio_data, f, indent=4)
+    
+    elif 'GpioPtt' in data:
+        radio_data = {}
+        if os.path.exists(RADIO_JSON):
+             with open(RADIO_JSON, 'r') as f: radio_data = json.load(f)
         radio_data['gpio_ptt'] = gpio_ptt
         radio_data['gpio_sql'] = gpio_sql
         with open(RADIO_JSON, 'w') as f: json.dump(radio_data, f, indent=4)
