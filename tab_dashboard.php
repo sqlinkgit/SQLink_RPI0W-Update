@@ -14,9 +14,6 @@ $CTCSS_MAP_LOCAL = [
 $my_ctcss = isset($radio['ctcss']) ? (string)$radio['ctcss'] : '0000';
 $display_ctcss = isset($CTCSS_MAP_LOCAL[$my_ctcss]) ? $CTCSS_MAP_LOCAL[$my_ctcss] : $my_ctcss;
 
-// Pobieranie Uptime systemu
-$uptime = shell_exec("uptime -p | sed 's/up //'");
-if(empty($uptime)) $uptime = "N/A";
 ?>
 
 <style>
@@ -104,38 +101,6 @@ if(empty($uptime)) $uptime = "N/A";
         <b style="color:#FF9800; font-size:14px;"><?php echo $display_ctcss; ?></b>
     </div>
     <?php endif; ?>
-</div>
-
-<div class="info-panel">
-    <div class="info-box">
-        <div class="info-label">Logiki</div>
-        <div class="info-value" style="color:#4CAF50;">SimplexLogic<br>ReflectorLogic</div>
-    </div>
-    <div class="info-box">
-        <div class="info-label">Moduły</div>
-        <div class="info-value" style="font-size:11px; line-height:1.4;">
-            <?php 
-                $mods_display = str_replace(',', '<br>', $vals['Modules']); 
-                echo empty($mods_display) ? '<span style="color:#F44336">BRAK</span>' : $mods_display;
-            ?>
-        </div>
-    </div>
-    <div class="info-box">
-        <div class="info-label">TG Default</div>
-        <div class="info-value hl"><?php echo $vals['DefaultTG']; ?></div>
-    </div>
-    <div class="info-box">
-        <div class="info-label">TG Active</div>
-        <div class="info-value hl" id="tg-active">0</div>
-    </div>
-    <div class="info-box">
-        <div class="info-label">Reflector</div>
-        <div class="info-value" id="ref-status">...</div>
-    </div>
-    <div class="info-box">
-        <div class="info-label">Uptime</div>
-        <div class="info-value" style="font-size:11px;"><?php echo $uptime; ?></div>
-    </div>
 </div>
 
 <div id="live-monitor" class="live-box">
