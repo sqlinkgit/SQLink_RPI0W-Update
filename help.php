@@ -115,6 +115,12 @@
     <div class="help-text">
         Oto kilka przydatnych funkcji, które ułatwią Ci życie z Hotspotem:
         <ul>
+            <li style="margin-bottom: 8px;"><strong>🔇 Cisza w Eterze (Recytacja Znaku):</strong>
+                <br>Denerwuje Cię ciągłe "Stefan Paweł..."? W zakładce <strong>Config</strong> (sekcja Zaawansowane) możesz wyłączyć opcję <strong>Recytowanie Znaku</strong>. Hotspot przestanie się przedstawiać głosowo (identyfikacja telegrafią CW pozostaje aktywna).
+            </li>
+            <li style="margin-bottom: 8px;"><strong>🛠️ Własne GPIO (Dla Konstruktorów):</strong>
+                <br>Budujesz niestandardowy interfejs? W zakładce <strong>Radio</strong> możesz teraz swobodnie zmieniać piny <strong>GPIO PTT i SQL</strong> bezpośrednio z panelu, bez edycji plików systemowych.
+            </li>
             <li style="margin-bottom: 8px;"><strong>🌍 Twoja Wizytówka w Sieci:</strong>
                 <br>W zakładce <strong>Config</strong> uzupełnij nową sekcję <em>"Lokalizacja i Operator"</em>. Dzięki temu Twoje Imię i Miasto będą widoczne dla innych kolegów w sieci (w dymkach informacyjnych i na mapie).
             </li>
