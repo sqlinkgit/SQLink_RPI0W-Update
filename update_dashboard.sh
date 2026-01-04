@@ -151,6 +151,7 @@ FLAG_ONLINE="/var/www/html/el_online.flag"
 FLAG_ERROR="/var/www/html/el_error.flag"
 
 pkill -f "tail -F -n +1 \$LOG_SOURCE"
+pkill -f "tail -F -n 0 \$LOG_SOURCE"
 
 touch \$LOG_DEST
 chown www-data:www-data \$LOG_DEST
@@ -163,7 +164,7 @@ tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
     fi
 
     case "\$line" in
-        *"EchoLink directory status changed to ON"*|*"ModuleEchoLink: Connected to"*)
+        *"EchoLink directory status changed to ON"*)
             touch "\$FLAG_ONLINE"
             rm -f "\$FLAG_ERROR"
             chown www-data:www-data "\$FLAG_ONLINE"
