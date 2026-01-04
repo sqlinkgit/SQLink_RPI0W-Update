@@ -225,10 +225,24 @@
     }
     
     $wifi_output = "";
+    $wifi_scan_results = [];
     if (isset($_POST['wifi_scan'])) { shell_exec('sudo nmcli dev wifi rescan'); $raw = shell_exec('sudo nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>&1'); $lines = explode("\n", $raw); foreach($lines as $line) { if(empty($line)) continue; $parts = explode(':', $line); $sec = array_pop($parts); $sig = array_pop($parts); $ssid = implode(':', $parts); if(!empty($ssid)) $wifi_scan_results[$ssid] = ['ssid'=>$ssid, 'signal'=>$sig, 'sec'=>$sec]; } usort($wifi_scan_results, function($a, $b) { return $b['signal'] - $a['signal']; }); }
     if (isset($_POST['wifi_connect'])) { $ssid = escapeshellarg($_POST['ssid']); $pass = escapeshellarg($_POST['pass']); $wifi_output = shell_exec("sudo nmcli dev wifi connect $ssid password $pass 2>&1"); }
     if (isset($_POST['wifi_delete'])) { $ssid = escapeshellarg($_POST['ssid']); $wifi_output = shell_exec("sudo nmcli connection delete $ssid 2>&1"); echo "<div class='alert alert-warning'>Usunięto sieć.</div><meta http-equiv='refresh' content='2'>"; }
     
+    $saved_wifi_list = [];
+    $raw_saved = shell_exec("sudo nmcli -t -f NAME,TYPE connection show | grep ':802-11-wireless' | cut -d: -f1");
+    if ($raw_saved) {
+        $lines = explode("\n", $raw_saved);
+        foreach($lines as $line) {
+            $line = trim($line);
+            if(!empty($line) && $line !== 'Rescue_AP' && $line !== 'preconfigured') {
+                $saved_wifi_list[] = $line;
+            }
+        }
+        sort($saved_wifi_list);
+    }
+
     $cache_file = '/tmp/sqlink_alert_cache.txt';
     $cache_time = 3600; 
     $alert_msg = "";
