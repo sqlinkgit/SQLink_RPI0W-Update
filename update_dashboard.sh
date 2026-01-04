@@ -186,10 +186,14 @@ tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
             rm -f "\$FLAG_ERROR"
             chown www-data:www-data "\$FLAG_ONLINE"
             ;;
-        *"EchoLink directory status changed to"*"OFF"*|*"Disconnected from EchoLink proxy"*)
+
+        # TU ZMIANA: Tylko OFF zostaje tutaj
+        *"EchoLink directory status changed to"*"OFF"*)
             rm -f "\$FLAG_ONLINE"
             ;;
-        *"EchoLink authentication failed"*|*"Connection failed"*)
+
+        # TU ZMIANA: Disconnected przenosimy do błędów (tworzenie FLAG_ERROR)
+        *"EchoLink authentication failed"*|*"Connection failed"*|*"Disconnected from EchoLink proxy"*)
             rm -f "\$FLAG_ONLINE"
             touch "\$FLAG_ERROR"
             chown www-data:www-data "\$FLAG_ERROR"
