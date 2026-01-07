@@ -129,7 +129,24 @@ function openDtmfSubTab(tabName) {
     localStorage.setItem('activeDtmfTab', tabName);
 }
 
+function dismissAlert(hash) {
+    document.getElementById('sq-alert').style.display = 'none';
+    localStorage.setItem('dismissed_alert', hash);
+}
+
+function checkAlert() {
+    var alertBox = document.getElementById('sq-alert');
+    if (alertBox) {
+        var hash = alertBox.getAttribute('data-hash');
+        var dismissed = localStorage.getItem('dismissed_alert');
+        if (dismissed === hash) {
+            alertBox.style.display = 'none';
+        }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+    checkAlert();
     var storedTab = localStorage.getItem('activeTab');
     if (storedTab) { openTab(null, storedTab); } else { openTab(null, 'Dashboard'); }
     

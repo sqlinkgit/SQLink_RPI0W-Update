@@ -185,6 +185,7 @@
         
         file_put_contents('/tmp/svx_new_settings.json', json_encode($updateData));
         shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1');
+        
         shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &');
         echo "<div class='alert alert-success'>Konfiguracja Radio i GPIO Zapisana! Restart...</div><meta http-equiv='refresh' content='3'>";
     }
@@ -300,6 +301,8 @@
             $alert_msg = file_get_contents($cache_file); 
         } 
     }
+    
+    $alert_hash = md5($alert_msg);
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -332,7 +335,10 @@
 <body>
 <div class="container">
     <?php if (!empty(trim($alert_msg))): ?>
-    <div style="background:#2196F3; color:#fff; text-align:center; padding:12px; font-weight:bold; border-bottom:2px solid #1976D2; font-size:14px;">📢 INFO: <?php echo htmlspecialchars($alert_msg); ?></div>
+    <div id="sq-alert" data-hash="<?php echo $alert_hash; ?>" style="background:#2196F3; color:#fff; padding:12px; font-weight:bold; border-bottom:2px solid #1976D2; font-size:14px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center;">
+        <span style="flex:1; text-align:center;">📢 INFO: <?php echo htmlspecialchars($alert_msg); ?></span>
+        <button onclick="dismissAlert('<?php echo $alert_hash; ?>')" style="background:none; border:none; color:#fff; font-weight:bold; font-size:16px; cursor:pointer; padding:0 5px; opacity:0.8;">&#10005;</button>
+    </div>
     <?php endif; ?>
     
     <header>
@@ -397,7 +403,7 @@
 
 <div class="main-footer">
     SvxLink v1.9.99.36@master Copyright (C) 2003-<?php echo date("Y"); ?> Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>
-    <span class="callsign-blue">SQLink System</span> • SierraEcho Team Edition<br>
+    <span class="callsign-blue">SQLink System</span> • SierraEcho & Team Edition<br>
     Copyright &copy; 2025<?php if(date("Y") > 2025) echo "-".date("Y"); ?> by <span class="callsign-blue">SQ7UTP</span>
     <div style="margin-top: 5px; font-size: 9px; opacity: 0.6;"><a href="https://github.com/SQLink-Official/SQLink-Official" target="_blank" style="color: inherit; text-decoration: none;">Source Code (AGPL v3)</a></div>
 </div>
