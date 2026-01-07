@@ -1,17 +1,67 @@
+<?php
+$custom_dtmf_file = '/var/www/html/dtmf_custom.json';
+$custom_buttons = [];
+if (file_exists($custom_dtmf_file)) {
+    $custom_buttons = json_decode(file_get_contents($custom_dtmf_file), true);
+    if (!is_array($custom_buttons)) $custom_buttons = [];
+}
+?>
+
 <div class="dtmf-columns">
     <div class="panel-box">
         <h4 class="panel-title">Reflector / Grupy</h4>
-        <div class="macro-grid">
-            <button onclick="sendInstant('*91260#')" class="macro-btn">Ogólnopolska<span class="dtmf-sub">TG 260</span></button>
-            <button onclick="sendInstant('*9126077#')" class="macro-btn">Sierra Echo<span class="dtmf-sub">TG 26077</span></button>
-            <button onclick="sendInstant('*91260066#')" class="macro-btn">ExtremeLink<span class="dtmf-sub">TG 260066</span></button>
-            <button onclick="sendInstant('*91235#')" class="macro-btn">Bridge UK<span class="dtmf-sub">TG 235</span></button>
-            <button onclick="sendInstant('*91245#')" class="macro-btn">EchoLink<span class="dtmf-sub">TG 245</span></button>
-            <button onclick="sendInstant('*91999#')" class="macro-btn">Testowa<span class="dtmf-sub">TG 999</span></button>
-            <button onclick="sendInstant('*912600#')" class="macro-btn">Zagraniczna<span class="dtmf-sub">TG 2600</span></button>
+        
+        <div class="dtmf-tabs">
+            <div class="dtmf-tab-btn active" id="tab-btn-SQLink" onclick="openDtmfSubTab('SQLink')">SQLink</div>
+            <div class="dtmf-tab-btn" id="tab-btn-Mine" onclick="openDtmfSubTab('Mine')">Moje</div>
+        </div>
 
-            <button onclick="sendInstant('*#')" class="macro-btn">Status<span class="dtmf-sub">(*#)</span></button>
-            <button onclick="sendInstant('910#')" class="macro-btn red">Rozłącz<span class="dtmf-sub">(910#)</span></button>
+        <div id="DTMF-SQLink" class="dtmf-subtab" style="display:block;">
+            <div class="macro-grid">
+                <button onclick="sendInstant('*91260#')" class="macro-btn">Ogólnopolska<span class="dtmf-sub">TG 260</span></button>
+                <button onclick="sendInstant('*9126077#')" class="macro-btn">Sierra Echo<span class="dtmf-sub">TG 26077</span></button>
+                <button onclick="sendInstant('*91260066#')" class="macro-btn">ExtremeLink<span class="dtmf-sub">TG 260066</span></button>
+                <button onclick="sendInstant('*91235#')" class="macro-btn">Bridge UK<span class="dtmf-sub">TG 235</span></button>
+                <button onclick="sendInstant('*91245#')" class="macro-btn">EchoLink<span class="dtmf-sub">TG 245</span></button>
+                <button onclick="sendInstant('*91999#')" class="macro-btn">Testowa<span class="dtmf-sub">TG 999</span></button>
+                <button onclick="sendInstant('*912600#')" class="macro-btn">Zagraniczna<span class="dtmf-sub">TG 2600</span></button>
+
+                <button onclick="sendInstant('*#')" class="macro-btn">Status<span class="dtmf-sub">(*#)</span></button>
+                <button onclick="sendInstant('910#')" class="macro-btn red">Rozłącz<span class="dtmf-sub">(910#)</span></button>
+            </div>
+        </div>
+
+        <div id="DTMF-Mine" class="dtmf-subtab" style="display:none;">
+            <?php if (empty($custom_buttons)): ?>
+                <div style="text-align:center; color:#777; padding:20px; font-size:13px;">Brak własnych przycisków. Dodaj poniżej.</div>
+            <?php else: ?>
+                <div class="macro-grid">
+                    <?php foreach($custom_buttons as $idx => $btn): ?>
+                        <div style="position:relative;">
+                            <button onclick="sendInstant('*91<?php echo $btn['tg']; ?>#')" class="macro-btn orange" style="color:#fff;">
+                                <?php echo htmlspecialchars($btn['name']); ?>
+                                <span class="dtmf-sub">TG <?php echo $btn['tg']; ?></span>
+                            </button>
+                            <form method="post" style="position:absolute; top:-5px; right:-5px; margin:0;">
+                                <input type="hidden" name="active_tab" class="active-tab-input" value="DTMF">
+                                <input type="hidden" name="del_dtmf_index" value="<?php echo $idx; ?>">
+                                <button type="submit" class="dtmf-del-mini" onclick="return confirm('Usunąć?')">x</button>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <div style="margin-top:20px; border-top:1px solid #444; padding-top:10px;">
+                <form method="post">
+                    <input type="hidden" name="active_tab" class="active-tab-input" value="DTMF">
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" name="add_dtmf_name" placeholder="Nazwa" class="node-input" style="flex:1; font-size:13px;" required>
+                        <input type="number" name="add_dtmf_code" placeholder="TG" class="node-input" style="width:80px; font-size:13px;" required>
+                        <button type="submit" class="macro-btn green" style="width:auto; min-height:40px; font-size:20px; padding:0 15px;">+</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

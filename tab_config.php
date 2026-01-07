@@ -1,3 +1,17 @@
+<?php
+    $current_host = $vals['Host'];
+    $current_port = $vals['Port'];
+
+    if (strpos($current_host, ':') !== false) {
+        $parts = explode(':', $current_host);
+        $current_host = $parts[0];
+        
+        if (empty($current_port) && isset($parts[1])) {
+            $current_port = $parts[1];
+        }
+    }
+?>
+
 <h3>Konfiguracja SvxLink</h3>
 <form method="post">
     <input type="hidden" name="active_tab" class="active-tab-input" value="SvxConfig">
@@ -5,9 +19,17 @@
     <div class="form-grid-layout">
         <div class="panel-box">
             <h4 class="panel-title">Reflector (SQLink)</h4>
-            <div class="form-group"><label>Znak Noda</label><input type="text" name="Callsign" value="<?php echo $vals['Callsign']; ?>"></div>
+            
+            <div class="form-group">
+                <label>Znak Noda</label>
+                <input type="text" name="Callsign" value="<?php echo $vals['Callsign']; ?>" oninput="this.value = this.value.toUpperCase()" style="text-transform:uppercase;">
+            </div>
+            
             <div class="form-group"><label>Hasło</label><input type="password" name="Password" value="<?php echo $vals['Password']; ?>"></div>
-            <div class="form-group"><label>Host</label><input type="text" name="Host" value="<?php echo $vals['Host']; ?>"></div>
+            
+            <div class="form-group"><label>Host</label><input type="text" name="Host" value="<?php echo $current_host; ?>"></div>
+            <div class="form-group"><label>Port</label><input type="number" name="Port" value="<?php echo $current_port; ?>" placeholder="5300"></div>
+            
             <div class="form-group"><label>Domyślna Grupa (TG)</label><input type="text" name="DefaultTG" value="<?php echo $vals['DefaultTG']; ?>"></div>
             
             <div class="form-group">
@@ -65,7 +87,7 @@
                 </div>
             </div>
 
-            <div class="advanced-grid">
+            <div class="advanced-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
                 <div class="form-group"><label>TG Timeout (s)</label><input type="number" name="TgTimeout" value="<?php echo $vals['TgTimeout']; ?>" required min="0"></div>
                 <div class="form-group"><label>Tmp Timeout (s)</label><input type="number" name="TmpTimeout" value="<?php echo $vals['TmpTimeout']; ?>" required min="0"></div>
                 <div class="form-group"><label>Beep 3-ton</label><select name="Beep3Tone"><option value="1" <?php if($vals['Beep3Tone']=='1') echo 'selected'; ?>>TAK</option><option value="0" <?php if($vals['Beep3Tone']=='0') echo 'selected'; ?>>NIE</option></select></div>

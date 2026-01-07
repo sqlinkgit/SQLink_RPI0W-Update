@@ -1,4 +1,38 @@
 <?php
+    $custom_dtmf_file = '/var/www/html/dtmf_custom.json';
+
+    if (isset($_POST['add_dtmf_name']) && isset($_POST['add_dtmf_code'])) {
+        $name = trim($_POST['add_dtmf_name']);
+        $tg = preg_replace('/[^0-9]/', '', $_POST['add_dtmf_code']);
+        
+        if (!empty($name) && !empty($tg)) {
+            $current_data = [];
+            if (file_exists($custom_dtmf_file)) {
+                $json_content = file_get_contents($custom_dtmf_file);
+                $current_data = json_decode($json_content, true) ?? [];
+            }
+            
+            $current_data[] = ['name' => $name, 'tg' => $tg];
+            
+            file_put_contents($custom_dtmf_file, json_encode($current_data));
+        }
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+    }
+
+    if (isset($_POST['del_dtmf_index'])) {
+        $idx = (int)$_POST['del_dtmf_index'];
+        if (file_exists($custom_dtmf_file)) {
+            $current_data = json_decode(file_get_contents($custom_dtmf_file), true) ?? [];
+            if (isset($current_data[$idx])) {
+                array_splice($current_data, $idx, 1);
+                file_put_contents($custom_dtmf_file, json_encode($current_data));
+            }
+        }
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+    }
+
     if (isset($_GET['ajax_stats'])) {
         header('Content-Type: application/json');
         $stats = [];
@@ -140,42 +174,25 @@
     }
 
     if (isset($_POST['save_radio'])) {
-        $currentConfig = [];
-        if (file_exists($jsonFile)) {
-            $decoded = json_decode(file_get_contents($jsonFile), true);
-            if (is_array($decoded)) {
-                $currentConfig = $decoded;
-            }
-        }
-
-        $currentConfig['rx'] = $_POST['rx_freq'];
-        $currentConfig['tx'] = $_POST['tx_freq'];
-        $currentConfig['ctcss'] = $_POST['ctcss_val'];
-        $currentConfig['desc'] = $_POST['radio_desc'];
+        $updateData = [
+            "rx" => $_POST['rx_freq'],
+            "tx" => $_POST['tx_freq'],
+            "ctcss" => $_POST['ctcss_val'],
+            "desc" => $_POST['radio_desc'],
+            "GpioPtt" => $_POST['gpio_ptt'] ?? '12',
+            "GpioSql" => $_POST['gpio_sql'] ?? '16'
+        ];
         
-        $new_ptt = $_POST['gpio_ptt'] ?? '12';
-        $new_sql = $_POST['gpio_sql'] ?? '16';
-        
-        $currentConfig['gpio_ptt'] = $new_ptt;
-        $currentConfig['gpio_sql'] = $new_sql;
-
-        file_put_contents($jsonFile, json_encode($currentConfig));
-        
-        $radio = $currentConfig;
-        
-        $hwUpdate = ["GpioPtt" => $new_ptt, "GpioSql" => $new_sql];
-        file_put_contents('/tmp/svx_new_settings.json', json_encode($hwUpdate));
+        file_put_contents('/tmp/svx_new_settings.json', json_encode($updateData));
         shell_exec('sudo /usr/bin/python3 /usr/local/bin/update_svx_full.py 2>&1');
-        
         shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &');
-        echo "<div class='alert alert-success'>Konfiguracja GPIO i Wizytówka Zapisane! Restart...</div><meta http-equiv='refresh' content='3'>";
+        echo "<div class='alert alert-success'>Konfiguracja Radio i GPIO Zapisana! Restart...</div><meta http-equiv='refresh' content='3'>";
     }
 
     if (isset($_POST['restart_srv'])) { shell_exec('sudo /usr/bin/systemctl restart svxlink > /dev/null 2>&1 &'); echo "<div class='alert alert-success'>Restart Usługi...</div>"; }
     if (isset($_POST['reboot_device'])) { shell_exec('sudo /usr/sbin/reboot > /dev/null 2>&1 &'); echo "<div class='alert alert-warning'>🔄 Reboot...</div>"; }
     if (isset($_POST['shutdown_device'])) { shell_exec('sudo /usr/sbin/shutdown -h now > /dev/null 2>&1 &'); echo "<div class='alert alert-error'>🛑 Shutdown...</div>"; }
     
-    // --- POPRAWKA: Użycie proxy_hunter.py ---
     if (isset($_POST['auto_proxy'])) { 
         if (file_exists('/usr/local/bin/auto_proxy.py')) {
      shell_exec('sudo /usr/bin/python3 /usr/local/bin/auto_proxy.py > /dev/null 2>&1 &');
@@ -380,7 +397,7 @@
 
 <div class="main-footer">
     SvxLink v1.9.99.36@master Copyright (C) 2003-<?php echo date("Y"); ?> Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>
-    <span class="callsign-blue">SQLink System</span> • SierraEcho & Team Edition<br>
+    <span class="callsign-blue">SQLink System</span> • SierraEcho Team Edition<br>
     Copyright &copy; 2025<?php if(date("Y") > 2025) echo "-".date("Y"); ?> by <span class="callsign-blue">SQ7UTP</span>
     <div style="margin-top: 5px; font-size: 9px; opacity: 0.6;"><a href="https://github.com/SQLink-Official/SQLink-Official" target="_blank" style="color: inherit; text-decoration: none;">Source Code (AGPL v3)</a></div>
 </div>

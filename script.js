@@ -112,9 +112,33 @@ function updateMapButtons(activeStyle) {
     });
 }
 
+function openDtmfSubTab(tabName) {
+    var tabs = document.getElementsByClassName("dtmf-subtab");
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].style.display = "none";
+    }
+    
+    var btns = document.getElementsByClassName("dtmf-tab-btn");
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].classList.remove("active");
+    }
+
+    document.getElementById("DTMF-" + tabName).style.display = "block";
+    document.getElementById("tab-btn-" + tabName).classList.add("active");
+    
+    localStorage.setItem('activeDtmfTab', tabName);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var storedTab = localStorage.getItem('activeTab');
     if (storedTab) { openTab(null, storedTab); } else { openTab(null, 'Dashboard'); }
+    
+    var storedDtmfTab = localStorage.getItem('activeDtmfTab');
+    if (storedDtmfTab) { 
+        openDtmfSubTab(storedDtmfTab); 
+    } else {
+        openDtmfSubTab('SQLink');
+    }
     
     if ($(".alert").length > 0) {
         setTimeout(function() {
