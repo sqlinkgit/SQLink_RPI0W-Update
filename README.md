@@ -7,7 +7,7 @@
 
 To jest **oficjalne repozytorium techniczne** zawierające kod źródłowy oraz skrypty systemowe dla autorskiego oprogramowania Hotspot + Dashboard.
 
-Projekt został stworzony przez **SQ7UTP** i jest integralną częścią infrastruktury sieciowej **SQLink - SierraEcho & Team**.
+Projekt został stworzony przez **SQ7UTP** i jest integralną częścią infrastruktury sieciowej **SQLink - SierraEcho Team**.
 
 ### 🔧 Przeznaczenie repozytorium
 Niniejsze repozytorium pełni funkcję magazynu plików (Backend) dla mechanizmu automatycznych aktualizacji (OTA).
@@ -37,7 +37,7 @@ Jako użytkownik przyjmujesz do wiadomości, że:
 
 This is the **official technical repository** containing the source code and system scripts for the custom Hotspot + Dashboard software.
 
-The project was created by **SQ7UTP** and is an integral part of the **SQLink - SierraEcho & Team** network infrastructure.
+The project was created by **SQ7UTP** and is an integral part of the **SQLink - SierraEcho Team** network infrastructure.
 
 ### 🔧 Repository Purpose
 This repository serves as a file storage (Backend) for the automatic update mechanism (OTA).
@@ -62,4 +62,4 @@ As a user, you acknowledge that:
 3. **Legal Compliance:** The user is fully responsible for ensuring that the use of this software and connected radio devices complies with local telecommunications regulations (valid radio license, adherence to frequency ranges, and emission power limits).
 
 ---
-*Copyright © 2025 SQ7UTP & SQLink - SierraEcho & Team*
+*Copyright © 2025 SQ7UTP & SQLink - SierraEcho Team*
