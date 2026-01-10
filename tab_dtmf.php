@@ -14,7 +14,7 @@ $DT = [
         
         'btn_tg_nat' => 'Ogólnopolska',
         'btn_tg_se' => 'Sierra Echo',
-        'btn_tg_ad' => 'A. Diploma',
+        'btn_tg_ad' => 'A. Dyplomowe',
         'btn_tg_br' => 'Bridge UK',
         'btn_tg_el' => 'EchoLink',
 
