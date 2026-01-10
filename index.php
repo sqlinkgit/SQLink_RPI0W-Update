@@ -357,10 +357,10 @@
     $wifi_output = "";
     $wifi_scan_results = [];
     
-    // --- SKANOWANIE WIFI (POPRAWKA UTF-8) ---
+
     if (isset($_POST['wifi_scan'])) { 
         shell_exec('sudo nmcli dev wifi rescan'); 
-        // Wymuszamy locale C.UTF-8, aby polskie znaki nie były ucinane
+
         $raw = shell_exec('sudo LC_ALL=C.UTF-8 nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>&1'); 
         
         $lines = explode("\n", $raw); 
@@ -370,8 +370,7 @@
             $sec = array_pop($parts); 
             $sig = array_pop($parts); 
             $ssid = implode(':', $parts); 
-            // Czasem nmcli w trybie -t escapuje dwukropki, tu zakładamy prosty podział
-            // Dodatkowe czyszczenie jeśli ssid jest pusty (ukryta sieć)
+
             if(!empty($ssid)) {
                 $wifi_scan_results[$ssid] = ['ssid'=>$ssid, 'signal'=>$sig, 'sec'=>$sec]; 
             }
@@ -382,7 +381,6 @@
     if (isset($_POST['wifi_connect'])) { 
         $ssid = escapeshellarg($_POST['ssid']); 
         $pass = escapeshellarg($_POST['pass']); 
-        // Tu również wymuszamy UTF-8 dla pewności
         $wifi_output = shell_exec("sudo LC_ALL=C.UTF-8 nmcli dev wifi connect $ssid password $pass 2>&1"); 
     }
     
@@ -393,7 +391,7 @@
     }
     
     $saved_wifi_list = [];
-    // --- LISTA ZAPAMIĘTANYCH SIECI (POPRAWKA UTF-8) ---
+
     $raw_saved = shell_exec("sudo LC_ALL=C.UTF-8 nmcli -t -f NAME,TYPE connection show | grep ':802-11-wireless' | cut -d: -f1");
     
     if ($raw_saved) {
