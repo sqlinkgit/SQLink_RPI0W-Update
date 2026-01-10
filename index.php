@@ -536,9 +536,9 @@
 
 <div class="main-footer">
     SvxLink v1.9.99.36@master Copyright (C) 2003-<?php echo date("Y"); ?> Tobias Blomberg / <span class="callsign-blue">SM0SVX</span><br>
-    <span class="callsign-blue"><?php echo $TR[$lang]['footer_system']; ?></span> • SierraEcho & Team Edition<br>
+    <span class="callsign-blue">SQLink System</span> • SierraEcho Team Edition<br>
     Copyright &copy; 2025<?php if(date("Y") > 2025) echo "-".date("Y"); ?> by <span class="callsign-blue">SQ7UTP</span>
-    <div style="margin-top: 5px; font-size: 9px; opacity: 0.6;"><a href="https://github.com/SQLink-Official/SQLink-Official" target="_blank" style="color: inherit; text-decoration: none;"><?php echo $TR[$lang]['source_code']; ?> (AGPL v3)</a></div>
+    <div style="margin-top: 5px; font-size: 9px; opacity: 0.6;"><a href="https://github.com/SQLink-Official/SQLink-Official" target="_blank" style="color: inherit; text-decoration: none;">Source Code (AGPL v3)</a></div>
 </div>
 
 <script> 
