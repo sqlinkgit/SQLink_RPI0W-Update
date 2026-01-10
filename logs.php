@@ -1,4 +1,17 @@
 <?php
+session_start();
+$lang = isset($_SESSION['lang']) ? $_SESSION['lang'] : 'pl';
+
+$TR = [
+    'pl' => [
+        'empty' => 'Log pusty.',
+        'waiting' => 'Oczekiwanie na dane z loggera...'
+    ],
+    'en' => [
+        'empty' => 'Log is empty.',
+        'waiting' => 'Waiting for logger data...'
+    ]
+];
 
 $logFile = '/var/www/html/svx_events.log';
 
@@ -17,9 +30,9 @@ if (file_exists($logFile)) {
         
         echo implode("\n", $output);
     } else {
-        echo "Log pusty.";
+        echo $TR[$lang]['empty'];
     }
 } else {
-    echo "Oczekiwanie na dane z loggera...";
+    echo $TR[$lang]['waiting'];
 }
 ?>

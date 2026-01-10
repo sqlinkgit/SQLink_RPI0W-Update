@@ -15,6 +15,22 @@ def load_lines(path):
 def save_lines(path, lines):
     with open(path, 'w', encoding='utf-8') as f: f.writelines(lines)
 
+def remove_key_from_section(lines, section, key):
+    new_lines = []
+    in_section = False
+    section_header = f"[{section}]"
+    
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_section = (stripped == section_header)
+
+        if in_section and stripped.startswith(f"{key}=") and not stripped.startswith(("#", ";")):
+            continue
+            
+        new_lines.append(line)
+    return new_lines
+
 def update_key_in_lines(lines, section, key, value):
     new_lines = []
     in_section = False
@@ -73,6 +89,7 @@ def main():
     with open(INPUT_JSON, 'r') as f: data = json.load(f)
 
     lines = load_lines(CONFIG_FILE)
+    lines = remove_key_from_section(lines, "GLOBAL", "DEFAULT_LANG")
 
     serial_port = data.get('SerialPort', '/dev/ttyS2')
     gpio_ptt = data.get('GpioPtt', '12')
@@ -181,14 +198,16 @@ def main():
             "REFCON_ENABLE": data.get('RefStatusInfo'),
             "UDP_HEARTBEAT_INTERVAL": "15",
             "LOCATION": location_conf_val,
-            "NODE_INFO_FILE": NODE_INFO_FILE
+            "NODE_INFO_FILE": NODE_INFO_FILE,
+            "DEFAULT_LANG": data.get('DEFAULT_LANG')
         },
         "SimplexLogic": {
             "CALLSIGN": simplex_callsign,
             "RGR_SOUND_ALWAYS": data.get('RogerBeep'),
             "MODULES": data.get('Modules'),
             "SHORT_IDENT_INTERVAL": short_ident,
-            "LONG_IDENT_INTERVAL": long_ident
+            "LONG_IDENT_INTERVAL": long_ident,
+            "DEFAULT_LANG": data.get('DEFAULT_LANG')
         },
         "ModuleEchoLink": {
             "CALLSIGN": data.get('EL_Callsign'),

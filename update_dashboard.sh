@@ -74,10 +74,27 @@ if [ -d "$GIT_DIR/PL" ]; then
     fi
 fi
 
+if [ -d "$GIT_DIR/en_US" ]; then
+    mkdir -p "$SOUNDS_DIR/en_US"
+    
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -av --delete "$GIT_DIR/en_US/" "$SOUNDS_DIR/en_US/"
+    else
+        if [ ! -d "$SOUNDS_DIR/en_US" ]; then
+            cp -R "$GIT_DIR/en_US" "$SOUNDS_DIR/"
+        else
+            cp -Ru "$GIT_DIR/en_US/"* "$SOUNDS_DIR/en_US/"
+        fi
+    fi
+    chmod -R 777 "$SOUNDS_DIR/en_US"
+fi
+
 cp $GIT_DIR/*.css $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.js $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.png $WWW_DIR/ 2>/dev/null
 cp $GIT_DIR/*.php $WWW_DIR/
+cp $GIT_DIR/*.svg $WWW_DIR/ 2>/dev/null
+chmod 644 $WWW_DIR/*.svg 2>/dev/null
 
 if [ ! -f "$WWW_DIR/radio_config.json" ] && [ -f "$GIT_DIR/radio_config.json" ]; then
     cp $GIT_DIR/radio_config.json $WWW_DIR/
@@ -114,11 +131,8 @@ if [ -f "$SVX_CONF" ]; then
     fi
 fi
 
-# --- WATCHDOG: AUTOMATYCZNA NAPRAWA PROXY ---
 cat <<EOF > /usr/local/bin/proxy_watchdog.sh
 #!/bin/bash
-# Sprawdza czy występuje błąd proxy (czerwona kropka na dashboardzie)
-# Jeśli tak -> uruchamia auto_proxy.py
 if [ -f "/var/www/html/el_error.flag" ]; then
     echo "\$(date): WATCHDOG - Wykryto awarię Proxy (el_error.flag). Uruchamiam naprawę..." >> /var/log/svxlink_watchdog.log
     /usr/bin/python3 /usr/local/bin/auto_proxy.py >> /var/log/svxlink_watchdog.log 2>&1
@@ -187,12 +201,12 @@ tail -F -n 0 "\$LOG_SOURCE" | while read -r line; do
             chown www-data:www-data "\$FLAG_ONLINE"
             ;;
 
-        # TU ZMIANA: Tylko OFF zostaje tutaj
+        
         *"EchoLink directory status changed to"*"OFF"*)
             rm -f "\$FLAG_ONLINE"
             ;;
 
-        # TU ZMIANA: Disconnected przenosimy do błędów (tworzenie FLAG_ERROR)
+        
         *"EchoLink authentication failed"*|*"Connection failed"*|*"Disconnected from EchoLink proxy"*)
             rm -f "\$FLAG_ONLINE"
             touch "\$FLAG_ERROR"

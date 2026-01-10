@@ -1,0 +1,77 @@
+
+Sat Jan 10 00:13:47 2026: SimplexLogic: Loading RX "Rx1"
+Sat Jan 10 00:13:47 2026: SimplexLogic: Loading TX "Tx1"
+Sat Jan 10 00:13:47 2026: Starting logic: ReflectorLogic
+Sat Jan 10 00:13:47 2026: *** ERROR: ReflectorLogic/AUTH_KEY missing in configuration or is empty
+Sat Jan 10 00:13:47 2026: *** ERROR: Could not load or initialize Logic object "ReflectorLogic". Skipping...
+Sat Jan 10 00:13:47 2026: *** WARNING: Logic ReflectorLogic has been specified in logic link ReflectorLink but that logic is missing. Removing logic from link.
+Sat Jan 10 00:13:47 2026: Tx1: Turning the transmitter ON
+Sat Jan 10 00:14:24 2026: Tx1: Turning the transmitter OFF
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:14:54 2026: SimplexLogic: Loading RX "Rx1"
+Sat Jan 10 00:14:54 2026: SimplexLogic: Loading TX "Tx1"
+Sat Jan 10 00:14:54 2026: Starting logic: ReflectorLogic
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.tcl
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/globals.tcl
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/ReflectorV2LogicType.tcl
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/LogicBase.tcl
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/locale.tcl
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Event handler script successfully loaded.
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Connecting to service
+Sat Jan 10 00:14:54 2026: Tx1: Turning the transmitter ON
+Sat Jan 10 00:14:54 2026: NOTICE: ReflectorLogic: Connection established to 146.59.87.158:5300 (primary)
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Authentication OK
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:14:54 2026: ReflectorLogic: Using audio codec "OPUS"
+Sat Jan 10 00:15:06 2026: Tx1: Turning the transmitter OFF
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:34:27 2026: SimplexLogic: Loading RX "Rx1"
+Sat Jan 10 00:34:27 2026: SimplexLogic: Loading TX "Tx1"
+Sat Jan 10 00:34:27 2026: Starting logic: ReflectorLogic
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.tcl
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/globals.tcl
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/ReflectorV2LogicType.tcl
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/LogicBase.tcl
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/locale.tcl
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Event handler script successfully loaded.
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Connecting to service
+Sat Jan 10 00:34:27 2026: Tx1: Turning the transmitter ON
+Sat Jan 10 00:34:27 2026: NOTICE: ReflectorLogic: Connection established to 146.59.87.158:5300 (primary)
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Authentication OK
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:34:27 2026: ReflectorLogic: Using audio codec "OPUS"
+Sat Jan 10 00:34:35 2026: Tx1: Turning the transmitter OFF
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:52:56 2026: SimplexLogic: Loading RX "Rx1"
+Sat Jan 10 00:52:56 2026: SimplexLogic: Loading TX "Tx1"
+Sat Jan 10 00:52:56 2026: Starting logic: ReflectorLogic
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.tcl
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/globals.tcl
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/ReflectorV2LogicType.tcl
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/LogicBase.tcl
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/locale.tcl
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Event handler script successfully loaded.
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Connecting to service
+Sat Jan 10 00:52:56 2026: Tx1: Turning the transmitter ON
+Sat Jan 10 00:52:56 2026: NOTICE: ReflectorLogic: Connection established to 146.59.87.158:5300 (primary)
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Authentication OK
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:52:56 2026: ReflectorLogic: Using audio codec "OPUS"
+Sat Jan 10 00:53:05 2026: Tx1: Turning the transmitter OFF
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:53:08 2026: SimplexLogic: Loading RX "Rx1"
+Sat Jan 10 00:53:08 2026: SimplexLogic: Loading TX "Tx1"
+Sat Jan 10 00:53:08 2026: Starting logic: ReflectorLogic
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.tcl
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/globals.tcl
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/ReflectorV2LogicType.tcl
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/LogicBase.tcl
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Loading /usr/local/share/svxlink/events.d/locale.tcl
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Event handler script successfully loaded.
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Connecting to service
+Sat Jan 10 00:53:08 2026: Tx1: Turning the transmitter ON
+Sat Jan 10 00:53:08 2026: NOTICE: ReflectorLogic: Connection established to 146.59.87.158:5300 (primary)
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Authentication OK
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Connected nodes: SQ7SE-L, SP9TP, SP7ALM-L, SQ7UTP, SP7ALM, SP7EZD
+Sat Jan 10 00:53:08 2026: ReflectorLogic: Using audio codec "OPUS"
+Sat Jan 10 00:53:16 2026: Tx1: Turning the transmitter OFF

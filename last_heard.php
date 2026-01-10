@@ -1,9 +1,23 @@
 <?php
+session_start();
+$lang = isset($_SESSION['lang']) ? $_SESSION['lang'] : 'pl';
+
+$TLH = [
+    'pl' => [
+        'waiting' => 'Oczekiwanie na dane...',
+        'no_calls' => 'Brak ostatnich rozmów w historii.'
+    ],
+    'en' => [
+        'waiting' => 'Waiting for data...',
+        'no_calls' => 'No recent calls in history.'
+    ]
+];
+
 $logFile = '/var/www/html/svx_events.log';
 $limit_display = 20;
 
 if (!file_exists($logFile)) {
-    echo "<tr><td colspan='3' style='text-align:center; color:#777; padding:10px;'>Oczekiwanie na dane...</td></tr>";
+    echo "<tr><td colspan='3' style='text-align:center; color:#777; padding:10px;'>" . $TLH[$lang]['waiting'] . "</td></tr>";
     exit;
 }
 
@@ -41,6 +55,6 @@ foreach ($lines as $line) {
 }
 
 if (!$found_any) {
-    echo "<tr><td colspan='3' style='text-align:center; color:#777; padding:10px;'>Brak ostatnich rozmów w historii.</td></tr>";
+    echo "<tr><td colspan='3' style='text-align:center; color:#777; padding:10px;'>" . $TLH[$lang]['no_calls'] . "</td></tr>";
 }
 ?>
