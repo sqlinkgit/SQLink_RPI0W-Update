@@ -12,6 +12,12 @@ $DT = [
         'ph_name' => 'Nazwa',
         'confirm_del' => 'Usunąć?',
         
+        'btn_tg_nat' => 'Ogólnopolska',
+        'btn_tg_se' => 'Sierra Echo',
+        'btn_tg_ad' => 'A. Diploma',
+        'btn_tg_br' => 'Bridge UK',
+        'btn_tg_el' => 'EchoLink',
+
         'sect_el' => 'EchoLink (Moduł 2)',
         'btn_activate' => '1. Aktywuj Moduł (2#)',
         'ph_node' => 'Nr Noda (np. 459342)',
@@ -43,6 +49,12 @@ $DT = [
         'ph_name' => 'Name',
         'confirm_del' => 'Delete?',
         
+        'btn_tg_nat' => 'National',
+        'btn_tg_se' => 'Sierra Echo',
+        'btn_tg_ad' => 'A. Diploma',
+        'btn_tg_br' => 'Bridge UK',
+        'btn_tg_el' => 'EchoLink',
+
         'sect_el' => 'EchoLink (Module 2)',
         'btn_activate' => '1. Activate Module (2#)',
         'ph_node' => 'Node No. (e.g. 459342)',
@@ -83,11 +95,11 @@ if (file_exists($custom_dtmf_file)) {
 
         <div id="DTMF-SQLink" class="dtmf-subtab" style="display:block;">
             <div class="macro-grid">
-                <button onclick="sendInstant('*91260#')" class="macro-btn">Ogólnopolska<span class="dtmf-sub">TG 260</span></button>
-                <button onclick="sendInstant('*9126077#')" class="macro-btn">Sierra Echo<span class="dtmf-sub">TG 26077</span></button>
-                <button onclick="sendInstant('*91260066#')" class="macro-btn">ExtremeLink<span class="dtmf-sub">TG 260066</span></button>
-                <button onclick="sendInstant('*91235#')" class="macro-btn">Bridge UK<span class="dtmf-sub">TG 235</span></button>
-                <button onclick="sendInstant('*91245#')" class="macro-btn">EchoLink<span class="dtmf-sub">TG 245</span></button>
+                <button onclick="sendInstant('*91260#')" class="macro-btn"><?php echo $DT[$lang]['btn_tg_nat']; ?><span class="dtmf-sub">TG 260</span></button>
+                <button onclick="sendInstant('*9126077#')" class="macro-btn"><?php echo $DT[$lang]['btn_tg_se']; ?><span class="dtmf-sub">TG 26077</span></button>
+                <button onclick="sendInstant('*91225#')" class="macro-btn"><?php echo $DT[$lang]['btn_tg_ad']; ?><span class="dtmf-sub">TG 260066</span></button>
+                <button onclick="sendInstant('*91235#')" class="macro-btn"><?php echo $DT[$lang]['btn_tg_br']; ?><span class="dtmf-sub">TG 235</span></button>
+                <button onclick="sendInstant('*91245#')" class="macro-btn"><?php echo $DT[$lang]['btn_tg_el']; ?><span class="dtmf-sub">TG 245</span></button>
                 <button onclick="sendInstant('*91999#')" class="macro-btn"><?php echo $DT[$lang]['btn_test']; ?><span class="dtmf-sub">TG 999</span></button>
                 <button onclick="sendInstant('*912600#')" class="macro-btn"><?php echo $DT[$lang]['btn_foreign']; ?><span class="dtmf-sub">TG 2600</span></button>
 
