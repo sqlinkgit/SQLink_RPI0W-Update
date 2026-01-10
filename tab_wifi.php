@@ -9,11 +9,10 @@ $TW = [
         'btn_del' => 'X Usuń',
         'confirm_del' => 'Czy na pewno usunąć zapamiętaną sieć:',
         'no_saved' => 'Brak zapamiętanych sieci.',
-        'new_conn' => 'Połącz z nową siecią',
+        'new_title' => 'Połącz z nową siecią',
         'btn_scan' => '📡 Skanuj Sieci WiFi',
         'scanning' => '⏳ Skanowanie...',
-        'connecting' => '⏳ Łączenie...',
-        'wait' => '(Czekaj...)',
+        'connecting' => '⏳ Łączenie... <span style=\'font-size:0.8em; font-weight:normal\'>(Czekaj...)</span>',
         'ph_pass' => 'Hasło',
         'btn_connect' => 'Połącz'
     ],
@@ -24,13 +23,12 @@ $TW = [
         'th_ssid' => 'SSID',
         'th_action' => 'Action',
         'btn_del' => 'X Delete',
-        'confirm_del' => 'Are you sure you want to delete network:',
+        'confirm_del' => 'Are you sure you want to delete saved network:',
         'no_saved' => 'No saved networks.',
-        'new_conn' => 'Connect to New Network',
+        'new_title' => 'Connect to New Network',
         'btn_scan' => '📡 Scan WiFi Networks',
         'scanning' => '⏳ Scanning...',
-        'connecting' => '⏳ Connecting...',
-        'wait' => '(Wait...)',
+        'connecting' => '⏳ Connecting... <span style=\'font-size:0.8em; font-weight:normal\'>(Wait...)</span>',
         'ph_pass' => 'Password',
         'btn_connect' => 'Connect'
     ]
@@ -65,7 +63,7 @@ $TW = [
 <p style="color:#888; font-style:italic;"><?php echo $TW[$lang]['no_saved']; ?></p>
 <?php endif; ?>
 
-<h3><?php echo $TW[$lang]['new_conn']; ?></h3>
+<h3><?php echo $TW[$lang]['new_title']; ?></h3>
 <form method="post" style="margin-bottom: 20px;" onsubmit="document.getElementById('scan-btn').innerText = '<?php echo $TW[$lang]['scanning']; ?>';">
     <input type="hidden" name="active_tab" class="active-tab-input" value="WiFi">
     <button type="submit" name="wifi_scan" id="scan-btn" class="btn btn-blue"><?php echo $TW[$lang]['btn_scan']; ?></button>
@@ -77,7 +75,7 @@ $TW = [
 </div>
 <?php endif; ?>
 
-<form method="post" style="margin-top:10px;" onsubmit="document.getElementById('btn-conn').innerHTML = '<?php echo $TW[$lang]['connecting']; ?> <span style=\'font-size:0.8em; font-weight:normal\'><?php echo $TW[$lang]['wait']; ?></span>';">
+<form method="post" style="margin-top:10px;" onsubmit="document.getElementById('btn-conn').innerHTML = '<?php echo $TW[$lang]['connecting']; ?>';">
     <input type="hidden" name="active_tab" class="active-tab-input" value="WiFi">
     
     <input type="text" id="wifi-ssid" name="ssid" placeholder="SSID">
